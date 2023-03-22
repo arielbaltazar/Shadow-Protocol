@@ -1,6 +1,6 @@
-create database mygame;
+create database shadowprotocoldb;
 
-use mygame;
+use shadowprotocoldb;
 
 create table user (
     usr_id int not null auto_increment,

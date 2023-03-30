@@ -3,18 +3,21 @@ const State = require("./statesModel");
 
 // For now it is only an auxiliary class to hold data in here 
 // so no need to create a model file for it
+//add chips here
 class Player {
-    constructor(id,name,state,order) {
+    constructor(id,name,state,order,deckId) {
         this.id = id;        
         this.name = name;
         this.state= state;
         this.order = order;
+        this.deckId = deckId;
     }
     export() {
         let player = new Player();
         player.name = this.name;
         player.state = this.state.export();
         player.order = this.order;
+        player.deckId = this.deckId;
         return player;
     }
 }
@@ -44,11 +47,11 @@ class Game {
         try {
             let [dbPlayers] = await pool.query(`Select * from user 
             inner join user_game on ug_user_id = usr_id
-             inner join user_game_state on ugst_id = ug_state_id
+            inner join user_game_state on ugst_id = ug_state_id
             where ug_game_id=?`, [game.id]);
             for (let dbPlayer of dbPlayers) {
                 let player = new Player(dbPlayer.ug_id,dbPlayer.usr_name,
-                            new State(dbPlayer.ugst_id,dbPlayer.ugst_state),dbPlayer.ug_order);
+                            new State(dbPlayer.ugst_id,dbPlayer.ugst_state),dbPlayer.ug_order,dbPlayer.ug_deck_id);
                 if (dbPlayer.usr_id == userId) game.player = player;
                 else game.opponents.push(player);
             }
@@ -66,7 +69,7 @@ class Game {
                     inner join user_game on gm_id = ug_game_id 
                     inner join user_game_state on ug_state_id = ugst_id
                     inner join game_state on gm_state_id = gst_id
-                    where ug_user_id=? and (gst_state IN ('Waiting','Started') 
+                    where ug_user_id=? and (gst_state IN ('Waiting','Started','Choose Deck','Ready') 
                     or (gst_state = 'Finished' and ugst_state = 'Score')) `, [id]);
             if (dbGames.length==0)
                 return {status:200, result:false};

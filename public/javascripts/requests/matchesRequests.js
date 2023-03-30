@@ -65,7 +65,6 @@ async function requestCreateMatch() {
     }
 }
 
-
 async function requestCancelMatch() {
     try {
         const response = await fetch(`/api/games/auth/cancel`, 

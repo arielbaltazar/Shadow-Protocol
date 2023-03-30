@@ -1,39 +1,65 @@
 const pool = require("../config/database");
+const Card = require("./decksModel");
 
 // auxiliary function to check if the game ended 
 async function checkEndGame(game) {
-    return game.turn >= Play.maxNumberTurns;
+    //return game.turn >= Play.maxNumberTurns;
 }
 
 class Play {
     // At this moment I do not need to store information so we have no constructor
 
     // Just a to have a way to determine end of game
-    static maxNumberTurns = 10;
+    //static maxNumberTurns = 10;
 
 
     // we consider all verifications were made
+    // start cards in hand and add cards after end turn
     static async startGame(game) {
         try {
             // Randomly determines who starts    
-            let myTurn = (Math.random() < 0.5);
-            let p1Id = myTurn ? game.player.id : game.opponents[0].id;
-            let p2Id = myTurn ? game.opponents[0].id : game.player.id;
+            //let myTurn = (Math.random() < 0.5);
+            //let p1Id = myTurn ? game.player.id : game.opponents[0].id;
+           // let p2Id = myTurn ? game.opponents[0].id : game.player.id;
             // Player that start changes to the state Playing and order 1 
-            await pool.query(`Update user_game set ug_state_id=?,ug_order=? where ug_id = ?`, [2, 1, p1Id]);
+            await pool.query(`Update user_game set ug_state_id=?,ug_order=? where ug_id = ?`, [5, 1, game.player.id]);
             // Player that is second changes to order 2
-            await pool.query(`Update user_game set ug_order=? where ug_id = ?`, [2, p2Id]);
+            await pool.query(`Update user_game set ug_state_id=?,ug_order=? where ug_id = ?`, [5, 2, game.opponents[0].id]);
 
             // Changing the game state to start
-            await pool.query(`Update game set gm_state_id=? where gm_id = ?`, [2, game.id]);
+            await pool.query(`Update game set gm_state_id=? where gm_id = ?`, [5, game.id]);
 
-            // ---- Specific rules for each game start bellow
+            await Card.genPlayerDeck(p1Id)
 
         } catch (err) {
             console.log(err);
             return { status: 500, result: err };
         }
     }
+
+    static async choosedeck(game, deckid) {
+        try {
+
+            await pool.query(`Update user_game set ug_state_id = ?, ug_deck_id = ? where ug_id = ?`,[6, deckid, game.player.id]);
+             ///ask teacher if is ok to do this
+            if(game.player.state.name == "Ready" || game.opponents[0].state.name == "Ready"){
+                let myTurn = (Math.random() < 0.5);
+                let p1Id = myTurn ? game.player.id : game.opponents[0].id;
+                let p2Id = myTurn ? game.opponents[0].id : game.player.id;
+                // Player that start changes to the state Playing and order 1 
+                await pool.query(`Update user_game set ug_state_id=? where ug_id = ?`, [2, p1Id]);
+                await pool.query(`Update user_game set ug_state_id=? where ug_id = ?`, [1, p2Id]);
+                await pool.query(`Update game set gm_state_id=? where gm_id = ?`, [2, game.id]);
+            }
+
+            return { status: 200, result: { msg: "You choose the deck: " + deckid} };
+
+        } catch (err) {
+            console.log(err);
+            return { status: 500, result: err };
+        }
+    }
+
 
 
     // This considers that only one player plays at each moment, 

@@ -71,7 +71,6 @@ async function createMatch() {
     }
 }
 
-
 async function logout() {
     try {
         let result = await requestLogout();

@@ -71,3 +71,24 @@ async function requestCloseScore() {
     }
 }
 
+async function requestPlayCard(deck_id) {
+    try {
+        const response = await fetch(`/api/decks/play`, 
+        {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+          method: "PATCH",
+          body: JSON.stringify({
+            cardid: deck_id
+        })
+      });
+      let result = await response.json();
+      return {successful: response.status == 200, msg: result.msg};
+    } catch (err) {
+        // Treat 500 errors here
+        console.log(err);
+        return {err: err};
+    }
+}

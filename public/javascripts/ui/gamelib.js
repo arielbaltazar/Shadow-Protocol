@@ -64,7 +64,7 @@ async function setup() {
 }
 
 function draw() {
-  background(50, 147, 144);
+  background(220);
   if (GameInfo.loading) {
     textAlign(CENTER, CENTER);
     textSize(40);
@@ -83,4 +83,3 @@ async function mouseClicked() {
     GameInfo.playerDeck.click();
 }
 }
-

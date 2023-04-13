@@ -27,6 +27,7 @@ create table user_game (
     ug_game_id int not null,
     ug_state_id int not null,
     ug_deck_id int,
+    ug_chips int not null default 5,
     primary key (ug_id));
 
 create table user_game_state (
@@ -58,7 +59,6 @@ create table card (
     crd_name varchar(50) not null,
     crd_gang varchar(50) not null,
     crd_type_id int not null,
-    crd_state_id int not null default 1, # see other way to do it
     primary key (crd_id));
 
 # see other way to do it
@@ -84,7 +84,8 @@ create table user_game_card (
     ugc_id int not null auto_increment,
     ugc_user_game_id int not null,
     ugc_crd_id int not null,
-    ugc_infield boolean not null,
+    ugc_infield boolean not null default false,
+    crd_state_id int not null, # see other way to do it
     primary key (ugc_id));
 
 #Position of the cards in the field
@@ -148,6 +149,6 @@ alter table card add constraint card_fk_crd_type
             foreign key (crd_type_id) references card_type(ct_id) 
 			ON DELETE NO ACTION ON UPDATE NO ACTION;
             
-alter table card add constraint card_fk_card_state
+alter table user_game_card add constraint card_fk_card_state
             foreign key (crd_state_id) references card_state(crd_state_id) 
 			ON DELETE NO ACTION ON UPDATE NO ACTION;

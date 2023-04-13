@@ -1,5 +1,6 @@
 const pool = require("../config/database");
-const Card = require("./decksModel");
+const Deck = require("./decksModel");
+const Settings = require("./gameSettings");
 
 // auxiliary function to check if the game ended 
 async function checkEndGame(game) {
@@ -20,7 +21,7 @@ class Play {
             // Randomly determines who starts    
             //let myTurn = (Math.random() < 0.5);
             //let p1Id = myTurn ? game.player.id : game.opponents[0].id;
-           // let p2Id = myTurn ? game.opponents[0].id : game.player.id;
+            //let p2Id = myTurn ? game.opponents[0].id : game.player.id;
             // Player that start changes to the state Playing and order 1 
             await pool.query(`Update user_game set ug_state_id=?,ug_order=? where ug_id = ?`, [5, 1, game.player.id]);
             // Player that is second changes to order 2
@@ -28,8 +29,6 @@ class Play {
 
             // Changing the game state to start
             await pool.query(`Update game set gm_state_id=? where gm_id = ?`, [5, game.id]);
-
-            await Card.genPlayerDeck(p1Id)
 
         } catch (err) {
             console.log(err);
@@ -50,6 +49,9 @@ class Play {
                 await pool.query(`Update user_game set ug_state_id=? where ug_id = ?`, [2, p1Id]);
                 await pool.query(`Update user_game set ug_state_id=? where ug_id = ?`, [1, p2Id]);
                 await pool.query(`Update game set gm_state_id=? where gm_id = ?`, [2, game.id]);
+
+                await Deck.genPlayerHand(game.player.id);
+                await Deck.genPlayerHand(game.opponents[0].id);
             }
 
             return { status: 200, result: { msg: "You choose the deck: " + deckid} };
@@ -76,6 +78,29 @@ class Play {
             // Change opponent state to playing (2)
             await pool.query(`Update user_game set ug_state_id=? where ug_id = ?`,
                 [2, game.opponents[0].id]);
+
+
+            let [nCards] = await pool.query(`Select ugc_crd_id from user_game_card where ugc_user_game_id = ? and crd_state_id = 2`,[game.player.id]);
+            let count = 0;
+            for (let nCard of nCards) {
+                count = count + 1;
+            }
+            if(count < Settings.MaxCards){
+                await Deck.addCardToHand(game.player.id);
+            }
+
+            let playerchips = game.player.chips;
+            if(playerchips < Settings.MaxChips){
+
+                playerchips += Settings.nChipsPerTurn;
+
+                if (playerchips > Settings.MaxChips){
+                    await pool.query(`update user_game set ug_chips = 10 where ug_user_id = ?`,[game.player.id]);
+                }else{
+                    await pool.query(`update user_game set ug_chips = ? where ug_user_id = ?`,[playerchips, game.player.id]);
+                }
+            }
+        
 
             // Both players played
             if (game.player.order == 2) {

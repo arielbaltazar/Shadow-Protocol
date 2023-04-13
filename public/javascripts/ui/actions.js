@@ -32,11 +32,10 @@ async function getDecksInfo() {
     if (GameInfo.playerDeck) GameInfo.playerDeck.update(GameInfo.matchdeck);
     else
       GameInfo.playerDeck = new Deck(
-        "Your cards",
         GameInfo.matchdeck,
         400,
         500,
-        null,
+        playCard,
         GameInfo.images.card
       );
   }
@@ -68,6 +67,19 @@ async function ChooseDeck2Action() {
     } else alert("Something went wrong choosing the deck.");
   }
 }
+
+
+async function playCard(card) {
+if (confirm(`Do you want to play the "${card.deck_crd_id.crd_name}" card?`)) {
+      let result = await requestPlayCard(card.deck_crd_id.crd_id);
+      if (result.successful) {
+          await getGameInfo();
+          await getDecksInfo();
+          alert("Card Played!");
+      }
+  }
+}
+
 
 async function closeScore() {
   let result = await requestCloseScore();

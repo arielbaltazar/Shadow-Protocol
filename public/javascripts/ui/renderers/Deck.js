@@ -90,8 +90,7 @@ class Deck {
   static titleHeight = 50;
   static nCards = 3;
 
-  constructor(title, cardsInfo, x, y, clickAction, cardImg) {
-    this.title = title;
+  constructor(cardsInfo, x, y, clickAction, cardImg) {
     this.x = x;
     this.y = y;
     this.width = Card.width * Deck.nCards;
@@ -121,7 +120,7 @@ class Deck {
     noStroke();
     textSize(28);
     textAlign(CENTER, CENTER);
-    text(this.title, this.x, this.y, this.width, Deck.titleHeight);
+    //text(this.title, this.x, this.y, this.width, Deck.titleHeight);
     for (let card of this.cards) {
       card.draw();
     }

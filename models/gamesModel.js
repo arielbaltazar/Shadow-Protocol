@@ -5,11 +5,12 @@ const State = require("./statesModel");
 // so no need to create a model file for it
 //add chips here
 class Player {
-    constructor(id,name,state,order,deckId) {
+    constructor(id,name,state,order, chips, deckId) {
         this.id = id;        
         this.name = name;
         this.state= state;
         this.order = order;
+        this.chips = chips;
         this.deckId = deckId;
     }
     export() {
@@ -17,7 +18,9 @@ class Player {
         player.name = this.name;
         player.state = this.state.export();
         player.order = this.order;
+        player.chips = this.chips;
         player.deckId = this.deckId;
+       
         return player;
     }
 }
@@ -51,7 +54,7 @@ class Game {
             where ug_game_id=?`, [game.id]);
             for (let dbPlayer of dbPlayers) {
                 let player = new Player(dbPlayer.ug_id,dbPlayer.usr_name,
-                            new State(dbPlayer.ugst_id,dbPlayer.ugst_state),dbPlayer.ug_order,dbPlayer.ug_deck_id);
+                            new State(dbPlayer.ugst_id,dbPlayer.ugst_state),dbPlayer.ug_order, dbPlayer.ug_chips ,dbPlayer.ug_deck_id);
                 if (dbPlayer.usr_id == userId) game.player = player;
                 else game.opponents.push(player);
             }

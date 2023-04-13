@@ -25,4 +25,18 @@ router.get("/ChoosenDeck", auth.verifyAuth, async function (req, res, next) {
   }
 });
 
+router.patch('/play', auth.verifyAuth, async function (req, res, next) {
+  try {
+      console.log("Play card with id: ",req.body.cardid);
+      if (!req.game || req.game.opponents.length == 0) {
+          res.status(400).send({msg:"Your are not in a game or are still waiting for another player."});
+      } 
+      let result = await Deck.playCard(req.game,req.body.cardid);
+      res.status(result.status).send(result.result);
+  } catch (err) {
+      console.log(err);
+      res.status(500).send(err);
+  }
+});
+
 module.exports = router;

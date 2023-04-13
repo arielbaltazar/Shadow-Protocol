@@ -80,6 +80,18 @@ if (confirm(`Do you want to play the "${card.deck_crd_id.crd_name}" card?`)) {
   }
 }
 
+async function attackCard(cardopp, cardopp) {
+  if (confirm(`Do you want to attack the "${cardopp.deck_crd_id.crd_name}" card with your "${cardopp.deck_crd_id.crd_name}" card?`)) {
+    let result = await requestAttackCard( playercrd.ugc_id, oppcrd.ugc_id);
+    if (result.successful) {
+      await getGameInfo();
+      await getDecksInfo();
+      alert("Card Attacked!");
+    }
+  }
+}
+
+
 
 async function closeScore() {
   let result = await requestCloseScore();

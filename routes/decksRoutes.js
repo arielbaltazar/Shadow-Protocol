@@ -39,4 +39,21 @@ router.patch('/play', auth.verifyAuth, async function (req, res, next) {
   }
 });
 
+router.patch('/attack', auth.verifyAuth, async function (req, res, next) {
+  try {
+    console.log("Attack card with id: ", req.body.playercrd, " against card with id: ", req.body.oppcrd);
+    if (!req.game || req.game.opponents.length == 0) {
+      res.status(400).send({msg: "You are not in a game or are still waiting for another player."});
+    } 
+    let result = await Deck.attackCard(req.game, req.body.playercrd, req.body.oppcrd);
+    res.status(result.status).send(result.result);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+});
+
+
 module.exports = router;
+
+

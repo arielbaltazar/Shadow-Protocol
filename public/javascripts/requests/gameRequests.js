@@ -92,3 +92,25 @@ async function requestPlayCard(deck_id) {
         return {err: err};
     }
 }
+
+async function requestAttackCard() {
+    try {
+        const response = await fetch(`/api/cards/attack`, 
+        {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+          method: "PATCH",
+          body: JSON.stringify({
+            playercrd: playercrd,
+            oppcrd: oppcrd
+        })
+      });
+      let result = await response.json();
+      return {successful: response.status == 200, msg: result.msg};
+    } catch (err) {
+        console.log(err);
+        return {err: err};
+    }
+}

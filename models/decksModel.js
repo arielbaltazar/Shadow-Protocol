@@ -60,8 +60,7 @@ class Card {
       );
       // insert the card
       let [result] = await pool.query(
-        `Insert into user_game_card (ugc_user_game_id,ugc_crd_id,crd_state_id)
-              values (?,?,2)`,
+        `Insert  into user_game_cards (ugc_user_game_id, ugc_crd_id, ugc_crd_health, ugc_crd_damage, ugc_state_id) values (?,?,?,?,2), [playerid, rndCard.deck_crd_id.crd_id,rndCard.deck_crd_id.crd_health, rndCard.deck_crd_id.crd_damage]`,
         [playerId, rndCard.deck_crd_id.crd_id]
       );
       return { status: 200, result: rndCard };
@@ -136,28 +135,51 @@ class Deck {
     }
   }
 
-   
   static async playCard(game, cardid) {
     try {
-        // get the card and check if the card is from the player and it is 
-        let [dbDeckCards] = await pool.query("Select * from card inner join deck on deck_crd_id = crd_id inner join card_type on crd_type_id = ct_id inner join user_game_card on ugc_crd_id = crd_id and crd_state_id = 2 where ugc_user_game_id = ? and ugc_crd_id = ?", [game.player.id, cardid]);
-        let card = fromDBCardToCard(dbDeckCards[0]);
-        let playerchips = game.player.chips;
-
-        if (playerchips < card.deck_crd_id.crd_cost) {
-          alert("Not enough chips points");
-        }
-
-        playerchips -= card.deck_crd_id.crd_cost;
-
-        await pool.query(`update user_game set ug_chips = ? where ug_user_id = ?`, [playerchips, game.player.id]);
-        await pool.query(`update user_game_card set ugc_infield = true, crd_state_id = 3 where ugc_user_game_id = ? and ugc_id = ?`, [game.player.id, card.ugc_id]);
+      // get the card and check if the card is from the player and it is 
+      let [dbDeckCards] = await pool.query("Select * from card inner join deck on deck_crd_id = crd_id inner join card_type on crd_type_id = ct_id inner join user_game_card on ugc_crd_id = crd_id and crd_state_id = 2 where ugc_user_game_id = ? and ugc_crd_id = ?", [game.player.id, cardid]);
+      let card = fromDBCardToCard(dbDeckCards[0]);
+      let playerchips = game.player.chips;
+  
+      if (playerchips < card.deck_crd_id.crd_cost) {
+        alert("Not enough chips points");
+      }
+  
+      playerchips -= card.deck_crd_id.crd_cost;
+  
+      await pool.query(`update user_game set ug_chips = ? where ug_user_id = ?`, [playerchips, game.player.id]);
+      await pool.query(`update user_game_card set ugc_infield = true, crd_state_id = 3 where ugc_user_game_id = ? and ugc_id = ?`, [game.player.id, card.ugc_id]);
+  
     } catch (err) {
-        console.log(err);
-        return { status: 500, result: err };
+      console.log(err);
+      return { status: 500, result: err };
     }
   }
+  
+  static async attackCard(game, playercrd, oppcrd) {
+    try {
+      let [dbCardplayer] = await pool.query("Select * from card inner join deck on deck_crd_id = crd_id inner join card_type on crd_type_id = ct_id inner join user_game_card on ugc_crd_id = crd_id and crd_state_id = 3 where ugc_user_game_id = ? and ugc_crd_id = ?", [game.player.id, playercrd]);
+      let [dbCardopp] = await pool.query("Select * from card inner join deck on deck_crd_id = crd_id inner join card_type on crd_type_id = ct_id inner join user_game_card on ugc_crd_id = crd_id and crd_state_id = 3 where ugc_user_game_id = ? and ugc_crd_id = ?", [game.opponents[0].id, oppcrd]);
+      let cardplayer = fromDBCardToCard(dbCardplayer[0]);
+      let cardopp = fromDBCardToCard(dbCardopp[0]);
 
+      cardopp.deck_crd_id.crd_health -= cardplayer.deck_crd_id.crd_damage;
+      if (cardopp.deck_crd_id.crd_health <= 0) {
+        await pool.query('update user_game_card set crd_state_id = 4 where ugc_id = ?', [cardopp.ugc_id]);
+      }else{
+        await pool.query('update user_game_card set ugc_crd_health = ? where ugc_id = ?', [cardopp.deck_crd_id.crd_health, cardopp.ugc_id]);
+      }
+      
+      console.log('Card attacked!');
+    } catch (err) {
+      console.log(err);
+      return { status: 500, result: err };
+    }
+  }
+   
+
+  
 
   static async genPlayerHand(playerId) {
     try {

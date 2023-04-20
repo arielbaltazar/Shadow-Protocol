@@ -35,10 +35,20 @@ async function getDecksInfo() {
         GameInfo.matchdeck,
         400,
         500,
-        playCard,
-        GameInfo.images.card
+        null,
+        GameInfo.images.card,
+        dragndrop
       );
+
+    if (GameInfo.oppDeck) GameInfo.oppDeck.update(GameInfo.matchdeck);
+    else
+      GameInfo.oppDeck = new Deck(GameInfo.matchdeck, null, null, null, null);
   }
+}
+async function dragndrop(x,y,card) {
+  let pos = GameInfo.board.getPlayerColumnAt(x,y);
+  playCard(card, pos);
+  //alert(pos);
 }
 
 async function endturnAction() {
@@ -68,30 +78,67 @@ async function ChooseDeck2Action() {
   }
 }
 
-
-async function playCard(card) {
-if (confirm(`Do you want to play the "${card.deck_crd_id.crd_name}" card?`)) {
-      let result = await requestPlayCard(card.deck_crd_id.crd_id);
-      if (result.successful) {
-          await getGameInfo();
-          await getDecksInfo();
-          alert("Card Played!");
-      }
+async function getBoardInfo() {
+  let result = await requestBoardInfo();
+  if (!result.successful) {
+    alert("Something is wrong with the game please login again!");
+    window.location.pathname = "index.html";
+  } else {
+    GameInfo.gameboard = result.board;
+    if (GameInfo.board) GameInfo.board.update(GameInfo.gameboard);
+    else
+      GameInfo.board = new Board(
+        GameInfo.gameboard,
+        GameInfo.game.player.name,
+        GameInfo.game.opponents[0].name,
+        400,
+        150,
+        650,
+        380,
+        30,
+        GameInfo.images.boardbg,
+        GameInfo.images.card,
+        clickActionAttack
+      );
   }
 }
 
-async function attackCard(cardopp, cardopp) {
-  if (confirm(`Do you want to attack the "${cardopp.deck_crd_id.crd_name}" card with your "${cardopp.deck_crd_id.crd_name}" card?`)) {
-    let result = await requestAttackCard( playercrd.ugc_id, oppcrd.ugc_id);
+
+// remake this
+let selectedCards = [];
+async function clickActionAttack(x,y) {
+  let card = GameInfo.board.getCardAt(x, y);
+  selectedCards.push(card);
+
+  if (selectedCards.length === 2) {
+    await attackCard(selectedCards[0], selectedCards[1]);
+    selectedCards = [];
+  }
+}
+
+async function playCard(card, position) {
+  //if (confirm(`Do you want to play the "${card.ugc_crd_name}" card?`)) {
+    let result = await requestPlayCard(card.ugc_id, position);
     if (result.successful) {
       await getGameInfo();
+      await getBoardInfo();
       await getDecksInfo();
-      alert("Card Attacked!");
+      alert("Card Played!");
     }
-  }
+  //}
 }
 
-
+async function attackCard(playercard, oppcard) {
+  //if (confirm(`Do you want to play the "${card.ugc_crd_name}" card?`)) {
+    let result = await requestAttackCard(playercard, oppcard);
+    if (result.successful) {
+      await getGameInfo();
+      await getBoardInfo();
+      await getDecksInfo();
+      alert("Card attacked!");
+    }
+  //}
+}
 
 async function closeScore() {
   let result = await requestCloseScore();

@@ -26,8 +26,8 @@ create table user_game (
     ug_user_id int not null,
     ug_game_id int not null,
     ug_state_id int not null,
-    ug_deck_id int,
     ug_chips int not null default 5,
+    ug_deck_id int,
     primary key (ug_id));
 
 create table user_game_state (
@@ -77,6 +77,7 @@ create table deck(
 	d_id int not null auto_increment,
     deck_id int not null,
     deck_crd_id int not null,
+    deck_crd_qty int not null,
     primary key (d_id));
 
 #Cards in the game (hand or field) 
@@ -84,20 +85,28 @@ create table user_game_card (
     ugc_id int not null auto_increment,
     ugc_user_game_id int not null,
     ugc_crd_id int not null,
+    ugc_crd_cost int not null,
     ugc_crd_health int not null,
     ugc_crd_damage int not null,
+    ugc_crd_name varchar(50) not null,
+    ugc_crd_gang varchar(50) not null,
+    ugc_crd_type_id int not null,
     ugc_infield boolean not null default false,
     crd_state_id int not null, # see other way to do it
     primary key (ugc_id));
 
 #Position of the cards in the field
-create table game_field_column (
-    gfcol_id int not null auto_increment,
-    gfcol_pos int not null,
-    gfcol_ug_id int not null,
-    gfcol_crd_id int not null,
-    primary key (gfcol_id));
+create table game_board (
+    gb_id int not null auto_increment,
+    gb_pos int not null,
+    primary key (gb_id));
 
+create table user_game_board (
+    ugb_id int not null auto_increment,
+    ugb_ug_id int not null,
+    ugb_crd_id int not null,
+    ugb_pos_id int not null,
+    primary key (ugb_id));
 
 # Foreign Keys
 
@@ -125,7 +134,7 @@ alter table scoreboard add constraint scoreboard_fk_scoreboard_state
             foreign key (sb_state_id) references scoreboard_state(sbs_id) 
 			ON DELETE NO ACTION ON UPDATE NO ACTION; 
 
- ----------- V2 ---------------
+----------- V2 ---------------
 
 alter table deck add constraint deck_fk_card
             foreign key (deck_crd_id) references card(crd_id) 
@@ -139,14 +148,14 @@ alter table user_game_card add constraint user_game_card_fk_card
             foreign key (ugc_crd_id) references card(crd_id) 
 			ON DELETE NO ACTION ON UPDATE NO ACTION;
             
-alter table game_field_column add constraint gfcol_fk_ug
-            foreign key (gfcol_ug_id) references user_game(ug_id) 
+alter table user_game_board add constraint ugc_fk_ug
+            foreign key (ugb_ug_id) references user_game(ug_id) 
 			ON DELETE NO ACTION ON UPDATE NO ACTION;
-
-alter table game_field_column add constraint gfcol_fk_card
-            foreign key (gfcol_crd_id) references card(crd_id)
-			ON DELETE NO ACTION ON UPDATE NO ACTION; 
-
+            
+alter table user_game_board add constraint ugc_fk_col
+            foreign key (ugb_pos_id) references game_board(gb_id) 
+			ON DELETE NO ACTION ON UPDATE NO ACTION;
+            
 alter table card add constraint card_fk_crd_type
             foreign key (crd_type_id) references card_type(ct_id) 
 			ON DELETE NO ACTION ON UPDATE NO ACTION;

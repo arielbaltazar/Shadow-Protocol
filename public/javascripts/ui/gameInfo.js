@@ -9,6 +9,7 @@ class GameInfo {
 
   // data
   static game;
+  static gameboard;
   static images = {};
   static sounds = {};
 
@@ -18,6 +19,8 @@ class GameInfo {
 
   static matchdeck;
   static playerDeck;
+  static oppDeck;
+  static board;
 
   // buttons
   static endturnButton;
@@ -32,23 +35,28 @@ class GameInfo {
       GameInfo.choosedeck1button.show();
       GameInfo.choosedeck2button.show();
       GameInfo.endturnButton.hide();
+      GameInfo.playerDeck.draggable = false;
     } else if (GameInfo.game.player.state == "Ready") {
       GameInfo.endturnButton.hide();
       GameInfo.choosedeck1button.hide();
       GameInfo.choosedeck2button.hide();
+      GameInfo.playerDeck.draggable = false;
     } else if (GameInfo.game.player.state == "Playing") {
       GameInfo.endturnButton.show();
       GameInfo.choosedeck1button.hide();
       GameInfo.choosedeck2button.hide();
+      GameInfo.playerDeck.draggable = true; 
     } else if (GameInfo.game.player.state == "Waiting") {
       GameInfo.endturnButton.hide();
       GameInfo.choosedeck1button.hide();
       GameInfo.choosedeck2button.hide();
+      GameInfo.playerDeck.draggable = false;
     } else if (GameInfo.game.player.state == "Score") {
       GameInfo.endturnButton.hide();
       GameInfo.choosedeck1button.hide();
       GameInfo.choosedeck2button.hide();
       GameInfo.scoreWindow.open();
+      GameInfo.playerDeck.draggable = false;
     }
   }
 }

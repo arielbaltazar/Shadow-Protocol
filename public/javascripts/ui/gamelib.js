@@ -5,8 +5,10 @@ async function refresh() {
     GameInfo.game.player.state == "Ready"
   ) {
     // Every time we are waiting
-    await getGameInfo();
+    await getGameInfo();  
+    await getBoardInfo();
     await getDecksInfo();
+  
 
     if (GameInfo.game.player.state != "Waiting") {
       // The moment we pass from waiting to play
@@ -19,6 +21,7 @@ async function refresh() {
 
 function preload() {
   GameInfo.images.card = loadImage("/assets/card_template.png");
+  GameInfo.images.boardbg = loadImage("/assets/window_green.png");
 }
 
 async function setup() {
@@ -27,6 +30,7 @@ async function setup() {
   // preload  images
 
   await getGameInfo();
+  await getBoardInfo();
   setInterval(refresh, 1000);
 
   //buttons (create a separated function if they are many)
@@ -74,12 +78,27 @@ function draw() {
     GameInfo.scoreWindow.draw();
   } else if (GameInfo.game.state != "Choose Deck" && GameInfo.game.state != "Ready"){
     GameInfo.playerDeck.draw();
+    GameInfo.playerDeck.updateDrag();
     GameInfo.scoreBoard.draw();
+    GameInfo.board.draw();
   }
 }
 
 async function mouseClicked() {
+  /*if ( GameInfo.playerDeck) {
+      GameInfo.playerDeck.click();
+  }*/
+  GameInfo.board.click();
+}
+
+async function mousePressed() {
   if ( GameInfo.playerDeck) {
-    GameInfo.playerDeck.click();
+    GameInfo.playerDeck.press();
+  }
 }
-}
+
+async function mouseReleased() {
+  if ( GameInfo.playerDeck) {
+    GameInfo.playerDeck.release();
+  }
+}  

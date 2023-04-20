@@ -166,7 +166,8 @@ class Deck {
     }
     this.draggingCard.dragging = false;
     if (this.dragAction) {
-      this.dragAction(mouseX, mouseY, this.draggingCard.card);
+      // console.log(this.draggingCard.card.ugc_id);
+      this.dragAction(mouseX, mouseY, this.draggingCard.card.ugc_id);
     }
     this.draggingCard = null;
   }

@@ -47,7 +47,7 @@ async function getDecksInfo() {
 }
 async function dragndrop(x,y,card) {
   let pos = GameInfo.board.getPlayerColumnAt(x,y);
-  playCard(card, pos);
+  await playCard(card, pos);
   //alert(pos);
 }
 
@@ -118,7 +118,7 @@ async function clickActionAttack(x,y) {
 
 async function playCard(card, position) {
   //if (confirm(`Do you want to play the "${card.ugc_crd_name}" card?`)) {
-    let result = await requestPlayCard(card.ugc_id, position);
+    let result = await requestPlayCard(card, position);
     if (result.successful) {
       await getGameInfo();
       await getBoardInfo();

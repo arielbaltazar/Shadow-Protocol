@@ -262,25 +262,22 @@ class Deck {
     try {
       // get the card and check if the card is from the player and it is
       let [dbDeckCards] = await pool.query(
-        "select * from user_game_card where ugc_user_game_id = ? and crd_state_id = 2 and ugc_id = ?",
-        [game.player.id, cardid]
+        "select * from user_game_card where crd_state_id = 2 and ugc_id = ?",
+        [cardid]
       );
+      if(!dbDeckCards.length){
+        return {
+          status: 400,
+          result: { msg: "Player has no cards." },
+        };
+      }
       let card = fromDBCardToCardGame(dbDeckCards[0]);
       let playerchips = game.player.chips;
 
       if (playerchips < card.ugc_crd_cost) {
-        //alert("Not enough chips points");
+        return { status: 400, result: { msg: "Not enough chips!" } };
       } else {
         playerchips -= card.ugc_crd_cost;
-
-        await pool.query(
-          `update user_game set ug_chips = ? where ug_user_id = ?`,
-          [playerchips, game.player.id]
-        );
-        await pool.query(
-          `update user_game_card set ugc_infield = true, crd_state_id = 3 where ugc_user_game_id = ? and ugc_id = ?`,
-          [game.player.id, cardid]
-        );
 
         let { result } = await Board.getBoard(game);
         let columns = result;
@@ -304,6 +301,14 @@ class Deck {
           [game.player.id, column, cardid]
         );
 
+        await pool.query(
+          `update user_game set ug_chips = ? where ug_user_id = ?`,
+          [playerchips, game.player.id]
+        );
+        await pool.query(
+          `update user_game_card set ugc_infield = true, crd_state_id = 3 where ugc_user_game_id = ? and ugc_id = ?`,
+          [game.player.id, cardid]
+        );
         return { status: 200, result: { msg: "Card played!" } };
       }
     } catch (err) {
@@ -316,6 +321,12 @@ class Deck {
     try {
       let [dbCardplayer] = await pool.query("Select * from user_game_card where crd_state_id = 3 and ugc_user_game_id = ? and ugc_id = ?", [game.player.id, playercrd]);
       let [dbCardopp] = await pool.query("Select * from user_game_card where crd_state_id = 3 and ugc_user_game_id = ? and ugc_id = ?", [game.opponents[0].id, oppcrd]);
+      if(!dbCardplayer.length){
+        return { status: 400, result: { msg: "Player has no cards!" } }
+      }
+      if(!dbCardopp.length){
+        return { status: 400, result: { msg: "Opp has no cards!" } }
+      }
       let cardplayer = fromDBCardToCardGame(dbCardplayer[0]);
       let cardopp = fromDBCardToCardGame(dbCardopp[0]);
 

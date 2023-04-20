@@ -84,7 +84,7 @@ class Board {
       if (column.posPlayer) {
         image(
           this.cardimg,
-          this.x + column.position * this.colsize + 120,
+          this.x + column.position * this.colsize + 5,
           this.y + Board.headery + this.rowsize + (this.rowsize - 190) / 2,
           120, //this.cardsize,
           190 //this.cardsize

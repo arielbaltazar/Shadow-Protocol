@@ -22,6 +22,33 @@ async function getGameInfo() {
   }
 }
 
+async function getBoardInfo() {
+  let result = await requestBoardInfo();
+  let cards = await requestCardsInBoard();
+  if (!result.successful) {
+    alert("Something is wrong with the game please login again!");
+    window.location.pathname = "index.html";
+  } else {
+    GameInfo.gameboard = result.board;
+    GameInfo.cardsInBoard = cards.result;
+    if (GameInfo.board) GameInfo.board.update(GameInfo.gameboard);
+    else
+      GameInfo.board = new Board(
+        GameInfo.gameboard,
+        GameInfo.game.player.name,
+        GameInfo.game.opponents[0].name,
+        400,
+        150,
+        650,
+        380,
+        30,
+        GameInfo.images.boardbg,
+        GameInfo.images.card,
+        clickActionAttack
+      );
+  }
+}
+
 async function getDecksInfo() {
   let result = await requestDeckChoosen();
   if (!result.successful) {
@@ -77,40 +104,16 @@ async function ChooseDeck2Action() {
     } else alert("Something went wrong choosing the deck.");
   }
 }
-
-async function getBoardInfo() {
-  let result = await requestBoardInfo();
-  if (!result.successful) {
-    alert("Something is wrong with the game please login again!");
-    window.location.pathname = "index.html";
-  } else {
-    GameInfo.gameboard = result.board;
-    if (GameInfo.board) GameInfo.board.update(GameInfo.gameboard);
-    else
-      GameInfo.board = new Board(
-        GameInfo.gameboard,
-        GameInfo.game.player.name,
-        GameInfo.game.opponents[0].name,
-        400,
-        150,
-        650,
-        380,
-        30,
-        GameInfo.images.boardbg,
-        GameInfo.images.card,
-        clickActionAttack
-      );
-  }
-}
-
-
-// remake this
+// remake this (maybe not)
 let selectedCards = [];
 async function clickActionAttack(x,y) {
   let card = GameInfo.board.getCardAt(x, y);
   selectedCards.push(card);
 
   if (selectedCards.length === 2) {
+    if(selectedCards[0] == selectedCards[1]){
+      alert("You can't attack your own card");
+    }
     await attackCard(selectedCards[0], selectedCards[1]);
     selectedCards = [];
   }

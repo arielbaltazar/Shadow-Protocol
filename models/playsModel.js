@@ -103,40 +103,29 @@ class Play {
         game.opponents[0].id,
       ]);
 
+      //-----------Add a card to player when finishes the turn-----------------
       let [nCards] = await pool.query(
         `Select ugc_crd_id from user_game_card where ugc_user_game_id = ? and crd_state_id = 2`,
         [game.player.id]
       );
-      let count = 0;
-      for (let nCard of nCards) {
-        count = count + 1;
+      if (nCards.length < Settings.MaxCards) {
+        await Deck.addCardToHand(game);
       }
-      if (count < Settings.MaxCards) {
-        await Deck.addCardToHand(game.player.id);
-      }
-
+      //-----------Add chips when finishes the turn-----------------
       let playerchips = game.player.chips;
-      if (playerchips < Settings.MaxChips) {
-        playerchips += Settings.nChipsPerTurn;
-
-        if (playerchips > Settings.MaxChips) {
-          await pool.query(
-            `update user_game set ug_chips = 10 where ug_user_id = ?`,
-            [game.player.id]
-          );
-        } else {
-          await pool.query(
-            `update user_game set ug_chips = ? where ug_user_id = ?`,
-            [playerchips, game.player.id]
-          );
-        }
-      }
+      playerchips += Settings.nChipsPerTurn;
+      if(playerchips > Settings.MaxChips)
+        playerchips = Settings.MaxChips;
+      await pool.query(
+        `update user_game set ug_chips = ? where ug_user_id = ?`,
+        [playerchips, game.player.id]
+      );
 
       // Both players played
       if (game.player.order == 2) {
         // Criteria to check if game ended
         if (await checkEndGame(game)) {
-          return await Play.endGame(game);
+          await this.endGame(game);
         } else {
           // Increase the number of turns and continue
           await pool.query(

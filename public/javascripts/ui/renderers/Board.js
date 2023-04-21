@@ -74,6 +74,7 @@ class Board {
     );
     for (let column of this.columns) {
       strokeWeight(5);
+      stroke(100, 200, 100);
       line(
         this.x + column.position * this.colsize,
         this.y,
@@ -81,23 +82,157 @@ class Board {
         this.y + this.height
       );
       strokeWeight(0);
+      //Draw Player Cards
       if (column.posPlayer) {
-        image(
-          this.cardimg,
-          this.x + column.position * this.colsize + 5,
-          this.y + Board.headery + this.rowsize + (this.rowsize - 190) / 2,
-          120, //this.cardsize,
-          190 //this.cardsize
-        );
+        //Cards variables
+        let cardX = this.x + column.position * this.colsize + 5;
+        let cardY = this.y + Board.headery + this.rowsize + (this.rowsize - 180) / 2;
+        for(let card of GameInfo.cardsInBoard){
+          if(card.ugb_crd_id == column.posPlayer){
+            if(card.crd_state_id == 4)
+              tint(255,0,0,255);
+
+            image(
+              this.cardimg,
+              cardX,
+              cardY,
+              120, //this.cardsize,
+              180 //this.cardsize
+            );
+            noTint();
+            textAlign(CENTER, CENTER);
+            fill(255);
+            textStyle(BOLD);
+            textSize(15);
+            stroke(0);
+            strokeWeight(2);
+            text(
+              card.ugc_crd_cost,
+              cardX + 120 * 0.905,
+              cardY + 180 * 0.065
+            );
+            text(
+              card.ugc_crd_damage,
+              cardX + 120 * 0.2,
+              cardY + 180 * 0.85
+            );
+            text(
+              card.ugc_crd_health,
+              cardX + 120 * 0.8,
+              cardY + 180 * 0.85
+            );
+            strokeWeight(1);
+            noStroke();
+            fill(0);
+            textSize(13);
+            text(
+              card.ugc_crd_name,
+              cardX + 120 * 0.5,
+              cardY + 180 * 0.63
+            );
+            textSize(10);
+            textAlign(CENTER, TOP);
+            text(
+              card.ugc_crd_gang,
+              cardX + 120 * 0.1,
+              cardY + 180 * 0.68,
+              120 * 0.8,
+              180 * 0.1
+            );
+            text(
+              "Health",
+              cardX + 120 * 0.39,
+              cardY + 180 * 0.9,
+              120 * 0.8,
+              180 * 0.1
+            );
+            text(
+              "Damage",
+              cardX + 120 * -0.19,
+              cardY + 180 * 0.9,
+              120 * 0.8,
+              180 * 0.1
+            );
+            textStyle(NORMAL);
+            noTint();
+          }
+        }
       }
       if (column.posOpponent) {
-        image(
-          this.cardimg,
-          this.x + column.position * this.colsize + this.cardsize,
-          this.y + Board.headery + (this.rowsize - this.cardsize) / 2,
-          this.cardsize,
-          this.cardsize
-        );
+        //Cards variables
+        let cardX = this.x + column.position * this.colsize + 5;
+        let cardY = this.y + Board.headery + (this.rowsize - this.cardsize - 170) / 2;
+        for(let card of GameInfo.cardsInBoard){
+          if(card.ugb_crd_id == column.posOpponent){
+
+            if(card.crd_state_id == 4)
+              tint(255,0,0,255);
+            
+            image(
+              this.cardimg,
+              cardX,
+              cardY,
+              120, //this.cardsize,
+              180 //this.cardsize
+            );
+            noTint();
+            textAlign(CENTER, CENTER);
+            fill(255);
+            textStyle(BOLD);
+            textSize(15);
+            stroke(0);
+            strokeWeight(2);
+            text(
+              card.ugc_crd_cost,
+              cardX + 120 * 0.905,
+              cardY + 180 * 0.065
+            );
+            text(
+              card.ugc_crd_damage,
+              cardX + 120 * 0.2,
+              cardY + 180 * 0.85
+            );
+            text(
+              card.ugc_crd_health,
+              cardX + 120 * 0.8,
+              cardY + 180 * 0.85
+            );
+            strokeWeight(1);
+            noStroke();
+            fill(0);
+            textSize(13);
+            text(
+              card.ugc_crd_name,
+              cardX + 120 * 0.5,
+              cardY + 180 * 0.63
+            );
+            textSize(10);
+            textAlign(CENTER, TOP);
+            text(
+              card.ugc_crd_gang,
+              cardX + 120 * 0.1,
+              cardY + 180 * 0.68,
+              120 * 0.8,
+              180 * 0.1
+            );
+            text(
+              "Health",
+              cardX + 120 * 0.39,
+              cardY + 180 * 0.9,
+              120 * 0.8,
+              180 * 0.1
+            );
+            text(
+              "Damage",
+              cardX + 120 * -0.19,
+              cardY + 180 * 0.9,
+              120 * 0.8,
+              180 * 0.1
+            );
+            textStyle(NORMAL);
+            noTint();
+          }
+        }
       }
     }
   }

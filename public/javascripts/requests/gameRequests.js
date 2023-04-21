@@ -86,6 +86,22 @@ async function requestBoardInfo() {
   }
 }
 
+async function requestCardsInBoard() {
+  try {
+    const response = await fetch(`/api/board/in-board`);
+    let result = await response.json();
+    return {
+      successful: response.status == 200,
+      unauthenticated: response.status == 401,
+      result: result,
+    };
+  } catch (err) {
+    // Treat 500 errors here
+    console.log(err);
+    return { err: err };
+  }
+}
+
 async function requestPlayCard(CardId, Position) {
   try {
     const response = await fetch(`/api/decks/play`, {

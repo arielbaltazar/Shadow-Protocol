@@ -10,10 +10,11 @@ class GameInfo {
   // data
   static game;
   static gameboard;
+  static cardsInBoard;
   static images = {};
   static sounds = {};
 
-  // rendererers
+  // renderers
   static scoreBoard;
   static scoreWindow;
 

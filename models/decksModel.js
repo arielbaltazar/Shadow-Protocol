@@ -331,13 +331,26 @@ class Deck {
       }
       let cardplayer = fromDBCardToCardGame(dbCardplayer[0]);
       let cardopp = fromDBCardToCardGame(dbCardopp[0]);
+       // Se a defesa da carta oponente for menor que o dano da carta do jogador, calcula o dano extra na carta chefe
+       let [dbchiefCard] = await pool.query("Select * from user_game_card where ugc_user_game_id = ? and ugc_id = ?", [game.opponents[0].id, chiefcrd]);
+       let chiefCard = fromDBCardToCardGame(dbchiefCard[0]);
 
       cardopp.ugc_crd_health -= cardplayer.ugc_crd_damage;
-      if (cardopp.ugc_crd_health <= 0) {
+      if (cardopp.ugc_crd_health <= 0 && chiefCard) {
+        chiefCard.ugc_crd_health -= Math.abs(chiefCard.ugc_crd_defense - cardplayer.ugc_crd_damage);
+        if (chiefCard.ugc_crd_health <= 0 ) {
+          // Se a carta chefe morrer, atualiza o estado da carta e do jogador para perdedor
+          await pool.query('update user_game_card set crd_state_id = 4, ugc_crd_health = 0 where ugc_id = ?', [chiefCard.ugc_id]);
+          await pool.query('update user_game set usr_game_status_id = 3 where usr_game_id = ?', [game.opponents[0].id]);
+          return { status: 200, result: { msg: "You won! Opponent's chief card died." } }; // colocar no playsmodels para conseguir terminar o jogo 
+        } 
         // dar update ao board para tirar a carta que esta morta
         await pool.query('update user_game_card set crd_state_id = 4, ugc_crd_health = 0 where ugc_id = ?', [cardopp.ugc_id]);
       } else {
         await pool.query('update user_game_card set ugc_crd_health = ? where ugc_id = ?', [cardopp.ugc_crd_health, cardopp.ugc_id]);
+      }
+      if (cardopp.ugc_crd_health <= 0 ) {
+        
       }
       return { status: 200, result: { msg: "Card attacked!" } };
     } catch (err) {

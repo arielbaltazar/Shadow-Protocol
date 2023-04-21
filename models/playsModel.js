@@ -5,8 +5,15 @@ const Settings = require("./gameSettings");
 // auxiliary function to check if the game ended
 async function checkEndGame(game) {
   //return game.turn >= Play.maxNumberTurns;
-}
+  let oppinf = await pool.query(
+    `select * from user_game where ug_id = ?`,
+    [ game.opponents[0].id]) // opp da posição 0
+   if (oppinf[0].ug_state_id == 4)
+   {
+    await Play.endGame(game)
+   }
 
+}
 class Play {
   // At this moment I do not need to store information so we have no constructor
 

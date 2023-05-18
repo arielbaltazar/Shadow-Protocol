@@ -1,6 +1,7 @@
 const pool = require("../config/database");
 const Settings = require("./gameSettings");
 const Board = require("./boardModel");
+const Play = require("./playsModel");
 
 function fromDBCardToCardGame(dbCardGame) {
   return new CardGame(
@@ -47,7 +48,7 @@ class Card {
   static async genDeck(playerId) {
     try {
       let [PlayerDeck] = await pool.query(
-        `select * from deck inner join card on crd_id = deck_crd_id inner join card_type on crd_type_id = ct_id inner join user_game on ug_deck_id = deck_id where ug_user_id = ?`,
+        `select * from deck inner join card on crd_id = deck_crd_id inner join card_type on crd_type_id = ct_id inner join user_game on ug_deck_id = deck_id where ug_id = ?`,
         [playerId]
       );
       let decks = [];
@@ -70,7 +71,16 @@ class Card {
           let [result] = await pool.query(
             `Insert into user_game_card (ugc_user_game_id,ugc_crd_id,ugc_crd_cost,ugc_crd_health,ugc_crd_damage,ugc_crd_name,ugc_crd_gang,ugc_crd_type_id,crd_state_id)
                   values (?,?,?,?,?,?,?,?,1)`,
-            [playerId, cards.deck_crd_id.crd_id, cards.deck_crd_id.crd_cost, cards.deck_crd_id.crd_health, cards.deck_crd_id.crd_damage, cards.deck_crd_id.crd_name, cards.deck_crd_id.crd_gang, cards.deck_crd_id.crd_type_id.id]
+            [
+              playerId,
+              cards.deck_crd_id.crd_id,
+              cards.deck_crd_id.crd_cost,
+              cards.deck_crd_id.crd_health,
+              cards.deck_crd_id.crd_damage,
+              cards.deck_crd_id.crd_name,
+              cards.deck_crd_id.crd_gang,
+              cards.deck_crd_id.crd_type_id.id,
+            ]
           );
         }
         decks.push(cards);
@@ -82,34 +92,21 @@ class Card {
     }
   }
 
-  static async genCard(game) {
+  static async genCard(playerId) {
     try {
-      let [possible_cards] = await pool.query(
-        `select * from deck where deck_id = ?`,
-        [game.player.deckId]
+      let [cards] = await pool.query(
+        `select * from user_game_card where ugc_crd_type_id != 1 and ugc_user_game_id = ? and crd_state_id = 1`,
+        [playerId]
       );
-      let random_card = Math.floor(Math.random() * possible_cards.length);
-      let [card] = await pool.query(`select * from card where crd_id = ?`, possible_cards[random_card].deck_crd_id);
-      await pool.query(
-        `insert into user_game_card values (default, ?, ?, ?, ?, ?, ?, ?, ?, false, 2)`, 
-        [game.player.id, card[0].crd_id, card[0].crd_cost, card[0].crd_health, card[0].crd_damage, card[0].crd_name, card[0].crd_gang, card[0].crd_type_id]);
-
-      //--------------------Before---------------------------
-      // let [cards] = await pool.query(
-      //   `select * from user_game_card where ugc_crd_type_id != 1 and ugc_user_game_id = ? and crd_state_id = 1`,
-      //   [playerId]
-      // );
-      // let rndCard = fromDBCardToCardGame(
-      //   cards[Math.floor(Math.random() * cards.length)]
-      // );
-      // // insert the card
-      // let [result] = await pool.query(
-      //   `update user_game_card set crd_state_id = 2 where ugc_user_game_id = ? and ugc_id = ?`,
-      //   [playerId, rndCard.ugc_id]
-      // );
-      //------------------------------------------------------
-      
-      return { status: 200, result: random_card };
+      let rndCard = fromDBCardToCardGame(
+        cards[Math.floor(Math.random() * cards.length)]
+      );
+      // insert the card
+      let [result] = await pool.query(
+        `update user_game_card set crd_state_id = 2 where ugc_user_game_id = ? and ugc_id = ?`,
+        [playerId, rndCard.ugc_id]
+      );
+      return { status: 200, result: rndCard };
     } catch (err) {
       console.log(err);
       return { status: 500, result: err };
@@ -137,9 +134,9 @@ class CardGame {
     this.ugc_crd_cost = ugc_crd_cost;
     this.ugc_crd_health = ugc_crd_health;
     this.ugc_crd_damage = ugc_crd_damage;
-    this.ugc_crd_name = ugc_crd_name,
-      this.ugc_crd_gang = ugc_crd_gang,
-      this.ugc_crd_type_id = ugc_crd_type_id;
+    (this.ugc_crd_name = ugc_crd_name),
+      (this.ugc_crd_gang = ugc_crd_gang),
+      (this.ugc_crd_type_id = ugc_crd_type_id);
     this.ugc_infield = ugc_infield;
     this.crd_state_id = crd_state_id;
   }
@@ -240,11 +237,11 @@ class Deck {
     }
   }
 
-  static async addCardToHand(game) {
+  static async addCardToHand(playerId) {
     try {
       let cards = [];
       for (let i = 0; i < Settings.nCardsPerTurn; i++) {
-        let result = await Card.genCard(game);
+        let result = await Card.genCard(playerId);
         cards.push(result.result);
       }
       return { status: 200, result: cards };
@@ -256,11 +253,12 @@ class Deck {
 
   static async playCard(game, cardid, column) {
     try {
-      //Get the card
+      // get the card and check if the card is from the player and it is
       let [dbDeckCards] = await pool.query(
-        "select * from user_game_card where crd_state_id = 2 and ugc_id = ?",
-        [cardid]
+        "select * from user_game_card where ugc_user_game_id = ? and crd_state_id = 2 and ugc_id = ?",
+        [game.player.id, cardid]
       );
+
       //Verify if the card exists
       if (!dbDeckCards.length) {
         return {
@@ -268,11 +266,10 @@ class Deck {
           result: { msg: "Player has no cards." },
         };
       }
-      let card = fromDBCardToCardGame(dbDeckCards[0]);
 
-      //Take the current amount of chips
+      let card = fromDBCardToCardGame(dbDeckCards[0]);
       let playerchips = game.player.chips;
-      //Verify if the player has enough chips 
+
       if (playerchips < card.ugc_crd_cost) {
         return { status: 400, result: { msg: "Not enough chips!" } };
       }
@@ -321,38 +318,108 @@ class Deck {
 
   static async attackCard(game, playercrd, oppcrd) {
     try {
-      let [dbCardplayer] = await pool.query("Select * from user_game_card where crd_state_id = 3 and ugc_user_game_id = ? and ugc_id = ?", [game.player.id, playercrd]);
-      let [dbCardopp] = await pool.query("Select * from user_game_card where crd_state_id = 3 and ugc_user_game_id = ? and ugc_id = ?", [game.opponents[0].id, oppcrd]);
-      if (!dbCardplayer.length) {
-        return { status: 400, result: { msg: "Player has no cards!" } }
-      }
-      if (!dbCardopp.length) {
-        return { status: 400, result: { msg: "Opp has no cards!" } }
-      }
-      let cardplayer = fromDBCardToCardGame(dbCardplayer[0]);
-      let cardopp = fromDBCardToCardGame(dbCardopp[0]);
-       // Se a defesa da carta oponente for menor que o dano da carta do jogador, calcula o dano extra na carta chefe
-       let [dbchiefCard] = await pool.query("Select * from user_game_card where ugc_user_game_id = ? and ugc_id = ?", [game.opponents[0].id, chiefcrd]);
-       let chiefCard = fromDBCardToCardGame(dbchiefCard[0]);
+      let [dbCardplayer] = await pool.query(
+        "Select * from user_game_card where crd_state_id = 3 and ugc_user_game_id = ? and ugc_id = ?",
+        [game.player.id, playercrd]
+      );
+      let [dbCardopp] = await pool.query(
+        "Select * from user_game_card where crd_state_id = 3 and ugc_user_game_id = ? and ugc_id = ?",
+        [game.opponents[0].id, oppcrd]
+      );
 
-      cardopp.ugc_crd_health -= cardplayer.ugc_crd_damage;
-      if (cardopp.ugc_crd_health <= 0 && chiefCard) {
-        chiefCard.ugc_crd_health -= Math.abs(chiefCard.ugc_crd_defense - cardplayer.ugc_crd_damage);
-        if (chiefCard.ugc_crd_health <= 0 ) {
-          // Se a carta chefe morrer, atualiza o estado da carta e do jogador para perdedor
-          await pool.query('update user_game_card set crd_state_id = 4, ugc_crd_health = 0 where ugc_id = ?', [chiefCard.ugc_id]);
-          await pool.query('update user_game set usr_game_status_id = 3 where usr_game_id = ?', [game.opponents[0].id]);
-          return { status: 200, result: { msg: "You won! Opponent's chief card died." } }; // colocar no playsmodels para conseguir terminar o jogo 
-        } 
-        // dar update ao board para tirar a carta que esta morta
-        await pool.query('update user_game_card set crd_state_id = 4, ugc_crd_health = 0 where ugc_id = ?', [cardopp.ugc_id]);
-      } else {
-        await pool.query('update user_game_card set ugc_crd_health = ? where ugc_id = ?', [cardopp.ugc_crd_health, cardopp.ugc_id]);
+      let [dbBoardCards] = await pool.query(
+        "select * from user_game_board, user_game_card where ugb_crd_id = ugc_id and ugc_crd_type_id != 1 and ugb_ug_id = ?",
+        [game.opponents[0].id]
+      );
+
+      let [dbchiefCard] = await pool.query(
+        "Select * from user_game_card where ugc_user_game_id = ? and ugc_crd_type_id = 1",
+        [game.opponents[0].id]
+      );
+
+      if (!dbCardplayer.length) {
+        return { status: 400, result: { msg: "Player has no cards!" } };
       }
-      if (cardopp.ugc_crd_health <= 0 ) {
-        
+
+      if (!dbCardopp.length) {
+        return { status: 400, result: { msg: "Opp has no cards!" } };
       }
-      return { status: 200, result: { msg: "Card attacked!" } };
+
+      let cardplayer = fromDBCardToCardGame(dbCardplayer[0]);
+      let cardopp = fromDBCardToCardGame(dbCardopp[0]); 
+      let chiefCard = fromDBCardToCardGame(dbchiefCard[0]);
+
+      //attack other cards
+      if (cardplayer.ugc_crd_type_id == 1) {
+        return { status: 400, result: { msg: "You can't attack with the chief!" } };
+      }else {
+        //attack chief
+        if (cardopp.ugc_crd_type_id == 1){
+          if (dbBoardCards.length == 0){
+            cardopp.ugc_crd_health -= cardplayer.ugc_crd_damage;
+
+            if (cardopp.ugc_crd_health <= 0) {
+              await pool.query(
+                "update user_game_card set crd_state_id = 4, ugc_crd_health = 0 where ugc_id = ?",
+                [cardopp.ugc_id]
+              );
+              //await Play.endGame(game);
+              return { status: 200, result: { msg: "You won! Opponent's chief card died." } };
+              //await pool.query('update user_game set ug_state_id = 4 where ug_user_id = ?', [game.opponents[0].id]);
+              //return { status: 200, result: { msg: "You won! Opponent's chief card died." } }; // colocar no playsmodels para conseguir terminar o jogo
+            } else {
+              await pool.query(
+                "update user_game_card set ugc_crd_health = ? where ugc_id = ?",
+                [cardopp.ugc_crd_health, cardopp.ugc_id]
+              );
+              return { status: 200, result: { msg: "Chief attacked!" } };
+            }
+          
+          }else{
+            return { status: 200, result: { msg: "You must clear the board to attack the chief!" } };
+          }
+        }else{
+          cardopp.ugc_crd_health -= cardplayer.ugc_crd_damage;
+          if (cardopp.ugc_crd_health < 0) {
+            //cheif damage
+            chiefCard.ugc_crd_health -= Math.abs(cardopp.ugc_crd_health);
+
+            if (chiefCard.ugc_crd_health <= 0) {
+              await pool.query(
+                "update user_game_card set crd_state_id = 4, ugc_crd_health = 0 where ugc_id = ?",
+                [chiefCard.ugc_id]
+              );
+              //await Play.endGame(game);
+              return { status: 200, result: { msg: "You won! Opponent's chief card died." } };
+              //await pool.query('update user_game set ug_state_id = 4 where ug_user_id = ?', [game.opponents[0].id]);
+              // colocar no playsmodels para conseguir terminar o jogo
+            } else {
+              await pool.query(
+                "update user_game_card set ugc_crd_health = ? where ugc_id = ?",
+                [chiefCard.ugc_crd_health, chiefCard.ugc_id]
+              );
+            }
+
+            await pool.query(
+              "update user_game_card set crd_state_id = 4, ugc_crd_health = 0 where ugc_id = ?",
+              [cardopp.ugc_id]
+            );
+
+            await pool.query("delete from user_game_board where ugb_crd_id = ?", [
+              cardopp.ugc_id,
+            ]);
+
+          } else {
+            await pool.query(
+              "update user_game_card set ugc_crd_health = ? where ugc_id = ?",
+              [cardopp.ugc_crd_health, cardopp.ugc_id]
+            );
+            
+          }
+          return { status: 200, result: { msg: "Card attacked!" } };
+        }
+      }
+
     } catch (err) {
       console.log(err);
       return { status: 500, result: err };

@@ -72,9 +72,9 @@ async function getDecksInfo() {
       GameInfo.oppDeck = new Deck(GameInfo.matchdeck, null, null, null, null);
   }
 }
-async function dragndrop(x,y,card) {
-  let pos = GameInfo.board.getPlayerColumnAt(x,y);
-  await playCard(card, pos);
+async function dragndrop(x, y, card) {
+  let pos = GameInfo.board.getPlayerColumnAt(x, y);
+  playCard(card, pos);
   //alert(pos);
 }
 
@@ -104,9 +104,10 @@ async function ChooseDeck2Action() {
     } else alert("Something went wrong choosing the deck.");
   }
 }
-// remake this (maybe not)
+
+// remake this
 let selectedCards = [];
-async function clickActionAttack(x,y) {
+async function clickActionAttack(x, y) {
   let card = GameInfo.board.getCardAt(x, y);
   selectedCards.push(card);
 
@@ -121,25 +122,25 @@ async function clickActionAttack(x,y) {
 
 async function playCard(card, position) {
   //if (confirm(`Do you want to play the "${card.ugc_crd_name}" card?`)) {
-    let result = await requestPlayCard(card, position);
-    if (result.successful) {
-      await getGameInfo();
-      await getBoardInfo();
-      await getDecksInfo();
-      alert("Card Played!");
-    }
+  let result = await requestPlayCard(card.ugc_id, position);
+  if (result.successful) {
+    await getGameInfo();
+    await getBoardInfo();
+    await getDecksInfo();
+    alert("Card Played!");
+  }
   //}
 }
 
 async function attackCard(playercard, oppcard) {
   //if (confirm(`Do you want to play the "${card.ugc_crd_name}" card?`)) {
-    let result = await requestAttackCard(playercard, oppcard);
-    if (result.successful) {
-      await getGameInfo();
-      await getBoardInfo();
-      await getDecksInfo();
-      alert("Card attacked!");
-    }
+  let result = await requestAttackCard(playercard, oppcard);
+  if (result.successful) {
+    await getGameInfo();
+    await getBoardInfo();
+    await getDecksInfo();
+    alert(result.msg);
+  }
   //}
 }
 

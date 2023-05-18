@@ -26,9 +26,9 @@ class Board {
         }
     }
 
-    static async getCardsInBoard(game){ // conseguir mostrar a informação das cartas no board 
+    static async getCardsInBoard(game){
         try{
-            let [cards] = await pool.query(`select * from user_game_board, user_game_card where ugb_crd_id = ugc_id and (ugb_ug_id = ? or ugb_ug_id = ?);`, [game.player.id, game.opponents[0].id]);
+            let [cards] = await pool.query(`select * from user_game_board, user_game_card where ugb_crd_id = ugc_id and (ugb_ug_id = ? or ugb_ug_id = ?)`, [game.player.id, game.opponents[0].id]);
 
             return{ status: 200, result: cards }
         } catch(err) {

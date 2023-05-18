@@ -1,4 +1,3 @@
-drop database if exists shadowprotocoldb;
 create database shadowprotocoldb;
 
 use shadowprotocoldb;

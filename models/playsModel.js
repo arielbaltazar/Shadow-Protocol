@@ -3,17 +3,16 @@ const Deck = require("./decksModel");
 const Settings = require("./gameSettings");
 
 // auxiliary function to check if the game ended
-async function checkEndGame(game) {
-  //return game.turn >= Play.maxNumberTurns;
-  let oppinf = await pool.query(
+/*async function checkEndGame(game) {
+ let oppinf = await pool.query(
     `select * from user_game where ug_id = ?`,
     [ game.opponents[0].id]) // opp da posição 0
    if (oppinf[0].ug_state_id == 4)
    {
     await Play.endGame(game)
    }
+}*/
 
-}
 class Play {
   // At this moment I do not need to store information so we have no constructor
 
@@ -24,11 +23,6 @@ class Play {
   // start cards in hand and add cards after end turn
   static async startGame(game) {
     try {
-      // Randomly determines who starts
-      //let myTurn = (Math.random() < 0.5);
-      //let p1Id = myTurn ? game.player.id : game.opponents[0].id;
-      // let p2Id = myTurn ? game.opponents[0].id : game.player.id;
-      // Player that start changes to the state Playing and order 1
       await pool.query(
         `Update user_game set ug_state_id=?,ug_order=? where ug_id = ?`,
         [5, 1, game.player.id]
@@ -80,10 +74,22 @@ class Play {
           game.id,
         ]);
 
-        //await Deck.genPlayerHand(game.player.id);
-        //await Deck.genPlayerHand(game.opponents[0].id);
+        // put the chief in the board
+        await pool.query(
+          `Update user_game_card set crd_state_id = 3 where ugc_crd_type_id = 1 and ugc_user_game_id = ?`,
+          [p1Id]
+        );
+        await pool.query(
+          `Insert into user_game_board(ugb_ug_id,ugb_pos_id,ugb_crd_id) values (?,5,(select ugc_id from user_game_card where ugc_crd_type_id = 1 and ugc_user_game_id = ?));`, [p1Id, p1Id]
+        );
+        await pool.query(
+          `Update user_game_card set crd_state_id = 3 where ugc_crd_type_id = 1 and ugc_user_game_id = ?`,
+          [p2Id]
+        );
+        await pool.query(
+          `Insert into user_game_board(ugb_ug_id,ugb_pos_id,ugb_crd_id) values (?,5,(select ugc_id from user_game_card where ugc_crd_type_id = 1 and ugc_user_game_id = ?));`, [p2Id, p2Id]
+        );
       }
-
       return { status: 200, result: { msg: "You choose the deck: " + deckid } };
     } catch (err) {
       console.log(err);
@@ -110,19 +116,19 @@ class Play {
         game.opponents[0].id,
       ]);
 
-      //-----------Add a card to player when finishes the turn-----------------
       let [nCards] = await pool.query(
         `Select ugc_crd_id from user_game_card where ugc_user_game_id = ? and crd_state_id = 2`,
         [game.player.id]
       );
+
       if (nCards.length < Settings.MaxCards) {
-        await Deck.addCardToHand(game);
+        await Deck.addCardToHand(game.player.id);
       }
-      //-----------Add chips when finishes the turn-----------------
+
       let playerchips = game.player.chips;
+
       playerchips += Settings.nChipsPerTurn;
-      if(playerchips > Settings.MaxChips)
-        playerchips = Settings.MaxChips;
+      if (playerchips > Settings.MaxChips) playerchips = Settings.MaxChips;
       await pool.query(
         `update user_game set ug_chips = ? where ug_user_id = ?`,
         [playerchips, game.player.id]
@@ -130,16 +136,10 @@ class Play {
 
       // Both players played
       if (game.player.order == 2) {
-        // Criteria to check if game ended
-        if (await checkEndGame(game)) {
-          await this.endGame(game);
-        } else {
-          // Increase the number of turns and continue
-          await pool.query(
-            `Update game set gm_turn=gm_turn+1 where gm_id = ?`,
-            [game.id]
-          );
-        }
+        await pool.query(
+          `Update game set gm_turn=gm_turn+1 where gm_id = ?`,
+          [game.id]
+        );
       }
 
       return { status: 200, result: { msg: "Your turn ended." } };

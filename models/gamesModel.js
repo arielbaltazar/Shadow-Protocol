@@ -15,6 +15,7 @@ class Player {
     }
     export() {
         let player = new Player();
+        player.id = this.id;
         player.name = this.name;
         player.state = this.state.export();
         player.order = this.order;

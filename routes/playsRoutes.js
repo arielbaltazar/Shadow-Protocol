@@ -43,6 +43,4 @@ router.patch('/endturn', auth.verifyAuth, async function (req, res, next) {
     }
 });
 
-
-
 module.exports = router;

@@ -5,15 +5,12 @@ async function refresh() {
     GameInfo.game.player.state == "Ready"
   ) {
     // Every time we are waiting
-    await getGameInfo();  
+    await getGameInfo();
     await getBoardInfo();
+    await getBenchInfo();
     await getDecksInfo();
-  
-
-    if (GameInfo.game.player.state != "Waiting") {
-      // The moment we pass from waiting to play
-      GameInfo.prepareUI();
-    }
+    
+    GameInfo.prepareUI();
   }
   // Nothing to do when we are playing since we control all that happens
   // so no update is needed from the server
@@ -21,16 +18,30 @@ async function refresh() {
 
 function preload() {
   GameInfo.images.card = loadImage("/assets/card_template.png");
-  GameInfo.images.boardbg = loadImage("/assets/window_green.png");
+  GameInfo.images.win = loadImage("/assets/win.png");
+  GameInfo.images.lose = loadImage("/assets/lose.png");
+  GameInfo.images.backcard = loadImage("/assets/backcard_template.png");
+  GameInfo.images.hack = loadImage("/assets/hack_template.png");
+  GameInfo.images.chief = loadImage("/assets/chief_template.png");
+  GameInfo.images.chipplayer = loadImage("/assets/chip_p.png");
+  GameInfo.images.chipopp = loadImage("/assets/chip_o.png");
+  GameInfo.images.backgroundgame = loadImage("/assets/background_game.jpg");
+  
+  //GameInfo.images.boardbg = loadImage("/assets/window_green.png");
 }
 
 async function setup() {
   let canvas = createCanvas(GameInfo.width, GameInfo.height);
   canvas.parent("game");
+
+  imageMode(CENTER);
+  angleMode(DEGREES);
   // preload  images
 
   await getGameInfo();
   await getBoardInfo();
+  await getBenchInfo();
+  await getDecksInfo();
   setInterval(refresh, 1000);
 
   //buttons (create a separated function if they are many)
@@ -60,7 +71,7 @@ async function setup() {
   GameInfo.choosedeck2button.mousePressed(ChooseDeck2Action);
   GameInfo.choosedeck2button.addClass("game");
 
-  await getDecksInfo();
+  
 
   GameInfo.prepareUI();
 
@@ -68,7 +79,8 @@ async function setup() {
 }
 
 function draw() {
-  background(220);
+  imageMode(CENTER);
+  image(GameInfo.images.backgroundgame, GameInfo.width / 2, GameInfo.height / 2);
   if (GameInfo.loading) {
     textAlign(CENTER, CENTER);
     textSize(40);
@@ -78,10 +90,27 @@ function draw() {
     GameInfo.scoreWindow.draw();
   } else if (GameInfo.game.state != "Choose Deck" && GameInfo.game.state != "Ready"){
     GameInfo.playerDeck.draw();
+    GameInfo.oppDeck.draw();
     GameInfo.playerDeck.updateDrag();
     GameInfo.scoreBoard.draw();
     GameInfo.board.draw();
+    GameInfo.bench.draw();
+    GameInfo.bench.updateDrag();
   }
+}
+
+async function endGame() {
+  if (
+    GameInfo.game.opponent[0].obj.crd_chief <= 0) {
+      image(GameInfo.images.win, 0, 0, GameInfo.width, GameInfo.height);
+      GameInfo.game.player.state = "End";
+    }
+   if(GameInfo.game.player.obj.crd_chief <= 0) {
+      image(GameInfo.images.lose, 0, 0, GameInfo.width, GameInfo.height);
+      GameInfo.game.player.state = "End";
+    }
+
+ 
 }
 
 async function mouseClicked() {
@@ -89,16 +118,23 @@ async function mouseClicked() {
       GameInfo.playerDeck.click();
   }*/
   GameInfo.board.click();
+  //GameInfo.bench.click();
 }
 
 async function mousePressed() {
   if ( GameInfo.playerDeck) {
     GameInfo.playerDeck.press();
   }
+  if (GameInfo.bench) {
+    GameInfo.bench.press();
+  }
 }
 
 async function mouseReleased() {
-  if ( GameInfo.playerDeck) {
+  if (GameInfo.playerDeck) {
     GameInfo.playerDeck.release();
+  }
+  if (GameInfo.bench) {
+    GameInfo.bench.release();
   }
 }  

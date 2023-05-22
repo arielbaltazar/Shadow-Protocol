@@ -76,14 +76,14 @@ class Play {
 
         // put the chief in the board
         await pool.query(
-          `Update user_game_card set crd_state_id = 3 where ugc_crd_type_id = 1 and ugc_user_game_id = ?`,
+          `Update user_game_card set crd_state_id = 4 where ugc_crd_type_id = 1 and ugc_user_game_id = ?`,
           [p1Id]
         );
         await pool.query(
           `Insert into user_game_board(ugb_ug_id,ugb_pos_id,ugb_crd_id) values (?,5,(select ugc_id from user_game_card where ugc_crd_type_id = 1 and ugc_user_game_id = ?));`, [p1Id, p1Id]
         );
         await pool.query(
-          `Update user_game_card set crd_state_id = 3 where ugc_crd_type_id = 1 and ugc_user_game_id = ?`,
+          `Update user_game_card set crd_state_id = 4 where ugc_crd_type_id = 1 and ugc_user_game_id = ?`,
           [p2Id]
         );
         await pool.query(
@@ -141,6 +141,11 @@ class Play {
           [game.id]
         );
       }
+
+      await pool.query(
+        "update user_game_card set ugc_crd_active = true where ugc_user_game_id = ? and crd_state_id = 4",
+        [game.player.id]
+      );
 
       return { status: 200, result: { msg: "Your turn ended." } };
     } catch (err) {

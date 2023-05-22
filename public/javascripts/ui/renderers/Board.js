@@ -10,8 +10,8 @@ class Board {
     width,
     height,
     bordersize,
-    backimg,
     cardimg,
+    chiefimg,
     clickaction
   ) {
     this.columns = columns;
@@ -22,8 +22,8 @@ class Board {
     this.width = width;
     this.height = height;
     this.bordersize = bordersize;
-    this.backimg = backimg;
     this.cardimg = cardimg;
+    this.chiefimg = chiefimg;
     this.clickaction = clickaction;
     /// precomputed
     this.cardx = this.cardimg.width / 2;
@@ -31,6 +31,7 @@ class Board {
     this.colsize = this.width / (this.columns.length);
     this.rowsize = (this.height - Board.headery) / 2;
     this.cardsize = this.colsize / 3;
+    this.clickCard = null;
   }
 
   update(columns) {
@@ -45,13 +46,13 @@ class Board {
       this.width + this.bordersize * 2,
       this.height + this.bordersize * 2
     );*/
-    stroke(100, 200, 100);
+    stroke(255, 255, 255);
     textAlign(CENTER, CENTER);
     fill(255);
     textSize(20);
     strokeWeight(5);
     line(
-      this.x,
+      this.x + 130,
       this.y + Board.headery + this.rowsize,
       this.x + this.width,
       this.y + Board.headery + this.rowsize
@@ -65,7 +66,7 @@ class Board {
     );
     line(this.x + 855, this.y, this.x + 855, this.y + this.height);
     strokeWeight(0);
-    text(
+    /*text(
       this.oppName,
       this.x,
       this.y + Board.headery,
@@ -78,11 +79,11 @@ class Board {
       this.y + Board.headery + this.rowsize,
       this.colsize,
       this.rowsize
-    );
+    );*/
     for (let column of this.columns) {
       if(column.position != 5){
         strokeWeight(5);
-        stroke(100, 200, 100);
+        stroke(255, 255, 255);
         line(
           this.x + column.position * this.colsize,
           this.y,
@@ -91,76 +92,65 @@ class Board {
         );
         strokeWeight(0);
         if (column.posPlayer) {
-          let cardX = this.x + column.position * this.colsize + 5;
-          let cardY = this.y + Board.headery + this.rowsize + (this.rowsize - 180) / 2;
+          let cardX = this.x + column.position * this.colsize + 65;
+          let cardY = this.y + Board.headery + this.rowsize + (this.rowsize + 10) / 2;
           for (let card of GameInfo.cardsInBoard) {
             if (card.ugb_crd_id == column.posPlayer) {
-              if (card.crd_state_id == 4) tint(255, 0, 0, 255);
+              //console.log(card.ugb_crd_id);
+              //console.log(GameInfo.selectedCards[0]);
+              if (card.crd_state_id == 5) tint(255, 0, 0, 255);
+              if(card.ugc_crd_active == false){
+                tint(255, 90);
+              }
 
-              image(
-                this.cardimg,
-                cardX,
-                cardY,
-                120, //this.cardsize,
-                180 //this.cardsize
-              );
-              noTint();
+              if(GameInfo.cardattack == true){
+                if (GameInfo.selectedCards.length >= 1){
+                  if(card.ugc_crd_active == true){
+                    if (GameInfo.selectedCards[0].ugc_id == card.ugb_crd_id /*|| GameInfo.selectedCards[1].ugc_id == card.ugb_crd_id*/){
+                      tint(0, 255, 0, 255);
+                    }
+                  }
+                }
+              }
+
+              image(this.cardimg, cardX, cardY, 120, 190);
+              //noTint();
               textAlign(CENTER, CENTER);
               fill(255);
               textStyle(BOLD);
               textSize(15);
               stroke(0);
               strokeWeight(2);
-              text(card.ugc_crd_cost, cardX + 120 * 0.905, cardY + 180 * 0.065);
-              text(card.ugc_crd_damage, cardX + 120 * 0.2, cardY + 180 * 0.85);
-              text(card.ugc_crd_health, cardX + 120 * 0.8, cardY + 180 * 0.85);
+              text(card.ugc_crd_cost, cardX - 49, cardY - 80);
+              text(card.ugc_crd_damage, cardX - 49, cardY + 80);
+              text(card.ugc_crd_health, cardX + 49, cardY + 80);
               strokeWeight(1);
               noStroke();
-              fill(0);
               textSize(13);
-              text(card.ugc_crd_name, cardX + 120 * 0.5, cardY + 180 * 0.63);
+              text(card.ugc_crd_name, cardX, cardY + 10);
               textSize(10);
               textAlign(CENTER, TOP);
-              text(
-                card.ugc_crd_gang,
-                cardX + 120 * 0.1,
-                cardY + 180 * 0.68,
-                120 * 0.8,
-                180 * 0.1
-              );
-              text(
-                "Health",
-                cardX + 120 * 0.39,
-                cardY + 180 * 0.9,
-                120 * 0.8,
-                180 * 0.1
-              );
-              text(
-                "Damage",
-                cardX + 120 * -0.19,
-                cardY + 180 * 0.9,
-                120 * 0.8,
-                180 * 0.1
-              );
+              text(card.ugc_crd_gang, cardX, cardY + 20);
+              fill(0);
               textStyle(NORMAL);
               noTint();
             }
           }
         }
         if (column.posOpponent) {
-          let cardX = this.x + column.position * this.colsize + 5;
-          let cardY = this.y + Board.headery + (this.rowsize - this.cardsize - 170) / 2;
+          let cardX = this.x + column.position * this.colsize + 65;
+          let cardY = this.y + Board.headery + (this.rowsize - this.cardsize + 30) / 2;
           for (let card of GameInfo.cardsInBoard) {
             if (card.ugb_crd_id == column.posOpponent) {
-              if (card.crd_state_id == 4) tint(255, 0, 0, 255);
-
-              image(
-                this.cardimg,
-                cardX,
-                cardY,
-                120, //this.cardsize,
-                180 //this.cardsize
-              );
+              if (card.crd_state_id == 5) tint(255, 0, 0, 255);
+              if(GameInfo.cardattack == true){
+                if (GameInfo.selectedCards.length === 2){
+                  if (GameInfo.selectedCards[0].ugc_id == card.ugb_crd_id || GameInfo.selectedCards[1].ugc_id == card.ugb_crd_id ){
+                    tint(0, 255, 0, 255);
+                  }
+                }
+              }
+              image(this.cardimg, cardX, cardY, 120, 190);
               noTint();
               textAlign(CENTER, CENTER);
               fill(255);
@@ -168,37 +158,17 @@ class Board {
               textSize(15);
               stroke(0);
               strokeWeight(2);
-              text(card.ugc_crd_cost, cardX + 120 * 0.905, cardY + 180 * 0.065);
-              text(card.ugc_crd_damage, cardX + 120 * 0.2, cardY + 180 * 0.85);
-              text(card.ugc_crd_health, cardX + 120 * 0.8, cardY + 180 * 0.85);
+              text(card.ugc_crd_cost, cardX - 49, cardY - 80);
+              text(card.ugc_crd_damage, cardX - 49, cardY + 80);
+              text(card.ugc_crd_health, cardX + 49, cardY + 80);
               strokeWeight(1);
               noStroke();
-              fill(0);
               textSize(13);
-              text(card.ugc_crd_name, cardX + 120 * 0.5, cardY + 180 * 0.63);
+              text(card.ugc_crd_name, cardX, cardY + 10);
               textSize(10);
               textAlign(CENTER, TOP);
-              text(
-                card.ugc_crd_gang,
-                cardX + 120 * 0.1,
-                cardY + 180 * 0.68,
-                120 * 0.8,
-                180 * 0.1
-              );
-              text(
-                "Health",
-                cardX + 120 * 0.39,
-                cardY + 180 * 0.9,
-                120 * 0.8,
-                180 * 0.1
-              );
-              text(
-                "Damage",
-                cardX + 120 * -0.19,
-                cardY + 180 * 0.9,
-                120 * 0.8,
-                180 * 0.1
-              );
+              text(card.ugc_crd_gang, cardX, cardY + 20);
+              fill(0);
               textStyle(NORMAL);
               noTint();
             }
@@ -206,7 +176,7 @@ class Board {
         }
       }else{
         strokeWeight(5);
-        stroke(100, 200, 100);
+        stroke(255, 255, 255);
         line(
           this.x + column.position * this.colsize + 75,
           this.y,
@@ -215,19 +185,24 @@ class Board {
         );
         strokeWeight(0);
         if (column.posPlayer) {
-          let cardX = this.x + column.position * this.colsize + 80;
-          let cardY = this.y + Board.headery + this.rowsize + (this.rowsize - 180) / 2;
+          let cardX = this.x + column.position * this.colsize + 140;
+          let cardY = this.y + Board.headery + this.rowsize + (this.rowsize + 10) / 2;
           for (let card of GameInfo.cardsInBoard) {
             if (card.ugb_crd_id == column.posPlayer) {
-              if (card.crd_state_id == 4) tint(255, 0, 0, 255);
+              if (card.crd_state_id == 5) tint(255, 0, 0, 255);
 
-              image(
-                this.cardimg,
-                cardX,
-                cardY,
-                120, //this.cardsize,
-                180 //this.cardsize
-              );
+              /*if (GameInfo.selectedCards.length === 2){
+                if(card.ugc_crd_active == true){
+                  if (GameInfo.selectedCards[1].ugc_id == card.ugb_crd_id){
+                    tint(0, 255, 0, 255);
+                  }
+                }
+              }*/
+              //if(card.ugc_crd_image){
+                //let cardimage = loadImage(card.ugc_crd_image);
+                //image(this.chiefimg, cardX, cardY - 190 / 4, 120, 190);
+              //}
+              image(this.chiefimg, cardX, cardY, 120, 190);
               noTint();
               textAlign(CENTER, CENTER);
               fill(255);
@@ -235,56 +210,41 @@ class Board {
               textSize(15);
               stroke(0);
               strokeWeight(2);
-              text(card.ugc_crd_cost, cardX + 120 * 0.905, cardY + 180 * 0.065);
-              text(card.ugc_crd_damage, cardX + 120 * 0.2, cardY + 180 * 0.85);
-              text(card.ugc_crd_health, cardX + 120 * 0.8, cardY + 180 * 0.85);
+              text(card.ugc_crd_health, cardX, cardY + 85);
               strokeWeight(1);
               noStroke();
-              fill(0);
               textSize(13);
-              text(card.ugc_crd_name, cardX + 120 * 0.5, cardY + 180 * 0.63);
+              text(card.ugc_crd_name, cardX, cardY + 10);
               textSize(10);
               textAlign(CENTER, TOP);
-              text(
-                card.ugc_crd_gang,
-                cardX + 120 * 0.1,
-                cardY + 180 * 0.68,
-                120 * 0.8,
-                180 * 0.1
-              );
-              text(
-                "Health",
-                cardX + 120 * 0.39,
-                cardY + 180 * 0.9,
-                120 * 0.8,
-                180 * 0.1
-              );
-              text(
-                "Damage",
-                cardX + 120 * -0.19,
-                cardY + 180 * 0.9,
-                120 * 0.8,
-                180 * 0.1
-              );
+              text(card.ugc_crd_gang, cardX, cardY + 20);
+              fill(0);
               textStyle(NORMAL);
               noTint();
             }
           }
         }
         if (column.posOpponent) {
-          let cardX = this.x + column.position * this.colsize + 80;
-          let cardY = this.y + Board.headery + (this.rowsize - this.cardsize - 170) / 2;
+          let cardX = this.x + column.position * this.colsize + 140;
+          let cardY = this.y + Board.headery + (this.rowsize - this.cardsize + 30) / 2;
           for (let card of GameInfo.cardsInBoard) {
             if (card.ugb_crd_id == column.posOpponent) {
-              if (card.crd_state_id == 4) tint(255, 0, 0, 255);
+              if (card.crd_state_id == 5) tint(255, 0, 0, 255);
 
-              image(
-                this.cardimg,
-                cardX,
-                cardY,
-                120, //this.cardsize,
-                180 //this.cardsize
-              );
+              if(GameInfo.cardattack == true){
+                if (GameInfo.selectedCards.length === 2){
+                  if (GameInfo.selectedCards[1].ugc_id == card.ugb_crd_id ){
+                    tint(0, 255, 0, 255);
+                  }
+                }
+              }
+
+              //if(card.ugc_crd_image){
+               // let cardimage = loadImage(card.ugc_crd_image);
+              //  image(cardimage, cardX, cardY, 120, 190);
+              //}
+
+              image(this.chiefimg, cardX, cardY, 120, 190);
               noTint();
               textAlign(CENTER, CENTER);
               fill(255);
@@ -292,37 +252,15 @@ class Board {
               textSize(15);
               stroke(0);
               strokeWeight(2);
-              text(card.ugc_crd_cost, cardX + 120 * 0.905, cardY + 180 * 0.065);
-              text(card.ugc_crd_damage, cardX + 120 * 0.2, cardY + 180 * 0.85);
-              text(card.ugc_crd_health, cardX + 120 * 0.8, cardY + 180 * 0.85);
+              text(card.ugc_crd_health, cardX, cardY + 85);
               strokeWeight(1);
               noStroke();
-              fill(0);
               textSize(13);
-              text(card.ugc_crd_name, cardX + 120 * 0.5, cardY + 180 * 0.63);
+              text(card.ugc_crd_name, cardX, cardY + 10);
               textSize(10);
               textAlign(CENTER, TOP);
-              text(
-                card.ugc_crd_gang,
-                cardX + 120 * 0.1,
-                cardY + 180 * 0.68,
-                120 * 0.8,
-                180 * 0.1
-              );
-              text(
-                "Health",
-                cardX + 120 * 0.39,
-                cardY + 180 * 0.9,
-                120 * 0.8,
-                180 * 0.1
-              );
-              text(
-                "Damage",
-                cardX + 120 * -0.19,
-                cardY + 180 * 0.9,
-                120 * 0.8,
-                180 * 0.1
-              );
+              text(card.ugc_crd_gang, cardX, cardY + 20);
+              fill(0);
               textStyle(NORMAL);
               noTint();
             }
@@ -378,8 +316,9 @@ class Board {
     mouseY < this.y + this.height &&
     mouseX > this.x + 5 * this.colsize + 75 &&
     mouseX < this.x + 855
-    */
+    */  
 
+    //remake the if
     if (
       y > this.y + Board.headery + this.rowsize &&
       y < this.y + this.height &&
@@ -387,8 +326,18 @@ class Board {
       x < this.x + this.width
     ) {
       let pos = Math.floor((x - this.x) / this.colsize) - 1;
-      let column = this.columns[pos];
-      return column.posPlayer;
+      let cardpress = this.columns[pos];
+
+      for (let column of this.columns) {
+        if (column.posPlayer == cardpress.posPlayer) {
+          for (let card of GameInfo.cardsInBoard) {
+            if (card.ugb_crd_id == cardpress.posPlayer) {
+              return card;
+            }
+          }
+        }
+      }
+      //return column.posPlayer;
     } 
     else if (
       y > this.y + Board.headery + this.rowsize &&
@@ -397,8 +346,18 @@ class Board {
       x < this.x + 855
     ) {
       let pos = Math.floor((x - this.x) / this.colsize) - 2;
-      let column = this.columns[pos];
-      return column.posPlayer;
+      let cardpress = this.columns[pos];
+
+      for (let column of this.columns) {
+        if (column.posPlayer == cardpress.posPlayer) {
+          for (let card of GameInfo.cardsInBoard) {
+            if (card.ugb_crd_id == cardpress.posPlayer) {
+              return card;
+            }
+          }
+        }
+      }
+      //return column.posPlayer;
     }
     else if (
       y > this.y + Board.headery &&
@@ -407,8 +366,18 @@ class Board {
       x < this.x + this.width
     ) {
       let pos = Math.floor((x - this.x) / this.colsize) - 1;
-      let column = this.columns[pos];
-      return column.posOpponent;
+      let cardpress = this.columns[pos];
+
+      for (let column of this.columns) {
+        if (column.posOpponent == cardpress.posOpponent) {
+          for (let card of GameInfo.cardsInBoard) {
+            if (card.ugb_crd_id == cardpress.posOpponent) {
+              return card;
+            }
+          }
+        }
+      }
+      //return column.posOpponent;
     }
     else if (
       y > this.y + Board.headery &&
@@ -417,8 +386,18 @@ class Board {
       x < this.x + 855
     ) {
       let pos = Math.floor((x - this.x) / this.colsize) - 2;
-      let column = this.columns[pos];
-      return column.posOpponent;
+      let cardpress = this.columns[pos];
+
+      for (let column of this.columns) {
+        if (column.posOpponent == cardpress.posOpponent) {
+          for (let card of GameInfo.cardsInBoard) {
+            if (card.ugb_crd_id == cardpress.posOpponent) {
+              return card;
+            }
+          }
+        }
+      }
+      //return column.posOpponent;
     }
   }
 }

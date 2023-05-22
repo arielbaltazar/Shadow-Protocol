@@ -3,19 +3,17 @@ const State = require("./statesModel");
 
 // Auxiliary class of the ScoreBoardLine
 class PlayerScore {
-    constructor (id,playerId,name,state,points) {
+    constructor (id,playerId,name,state) {
         this.id = id;
         this.playerId = playerId;
         this.name = name;
         this.state = state;
-        this.points = points;
     }
     export() {
         let score = new PlayerScore();
         score.id = this.id;
         score.name = this.name;
         score.state = this.state.name;
-        score.points = this.points; 
         return score;
     }
 
@@ -29,7 +27,7 @@ class PlayerScore {
             where ug_id=?`, [playerId]);
             let dbPS = dbPlayerScores[0];
             let pScore = new PlayerScore(dbPS.usr_id,dbPS.ug_id,dbPS.usr_name,
-                            new State(dbPS.sbs_id,dbPS.sbs_state),dbPS.sb_points );
+                            new State(dbPS.sbs_id,dbPS.sbs_state));
             return {status:200, result: pScore};
         } catch (err) {
             console.log(err);
@@ -100,7 +98,7 @@ class ScoreBoardLine {
                     currGameId = line.gm_id;
                 }
                 let pScore = new PlayerScore(line.usr_id,line.ug_id,line.usr_name,
-                    new State(line.sbs_id,line.sbs_state),line.sb_points );
+                    new State(line.sbs_id,line.sbs_state));
                 currSB.playerScores.push(pScore);
             }
             if (currSB) sbLines.push(currSB);

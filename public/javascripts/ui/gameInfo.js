@@ -2,8 +2,8 @@
 // we only have one game info so everything is static
 class GameInfo {
   // settings variables
-  static width = 1400;
-  static height = 750;
+  static width = 1879;
+  static height = 977;
 
   static loading = true;
 
@@ -11,8 +11,11 @@ class GameInfo {
   static game;
   static gameboard;
   static cardsInBoard;
+  static gamebench;
+  static cardsInBench;
   static images = {};
   static sounds = {};
+  static selectedCards = [];
 
   // renderers
   static scoreBoard;
@@ -22,6 +25,13 @@ class GameInfo {
   static playerDeck;
   static oppDeck;
   static board;
+  static bench;
+  static player;
+  static opponent;
+
+  //verification
+  static dragbenchtoboard = false;
+  static attackcard = false;
 
   // buttons
   static endturnButton;
@@ -37,27 +47,32 @@ class GameInfo {
       GameInfo.choosedeck2button.show();
       GameInfo.endturnButton.hide();
       GameInfo.playerDeck.draggable = false;
+      GameInfo.bench.draggable = false;
     } else if (GameInfo.game.player.state == "Ready") {
       GameInfo.endturnButton.hide();
       GameInfo.choosedeck1button.hide();
       GameInfo.choosedeck2button.hide();
       GameInfo.playerDeck.draggable = false;
+      GameInfo.bench.draggable = false;
     } else if (GameInfo.game.player.state == "Playing") {
       GameInfo.endturnButton.show();
       GameInfo.choosedeck1button.hide();
       GameInfo.choosedeck2button.hide();
-      GameInfo.playerDeck.draggable = true; 
+      GameInfo.playerDeck.draggable = true;
+      GameInfo.bench.draggable = true;
     } else if (GameInfo.game.player.state == "Waiting") {
       GameInfo.endturnButton.hide();
       GameInfo.choosedeck1button.hide();
       GameInfo.choosedeck2button.hide();
       GameInfo.playerDeck.draggable = false;
+      GameInfo.bench.draggable = false;
     } else if (GameInfo.game.player.state == "Score") {
       GameInfo.endturnButton.hide();
       GameInfo.choosedeck1button.hide();
       GameInfo.choosedeck2button.hide();
       GameInfo.scoreWindow.open();
       GameInfo.playerDeck.draggable = false;
+      GameInfo.bench.draggable = false;
     }
   }
 }

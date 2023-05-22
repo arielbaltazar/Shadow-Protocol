@@ -1,11 +1,12 @@
 class Card {
-  static width = 120; //210
-  static height = 190; //315
-  constructor(card, x, y, img) {
+  static width = 120;
+  static height = 190;
+  constructor(card, x, y, cimg, himg) {
     this.card = card;
     this.x = x;
     this.y = y;
-    this.img = img;
+    this.cimg = cimg;
+    this.himg = himg;
 
     this.dragging = false;
     this.offsety = 0;
@@ -16,79 +17,105 @@ class Card {
   }
 
   draw() {
-    image(this.img, this.x, this.y, Card.width, Card.height);
+    if(this.card.ugc_user_game_id == GameInfo.game.opponents[0].id){
+      image(this.cimg, this.x, this.y, Card.width, Card.height);
+    }else if(this.card.ugc_crd_type_id == 4){
+      image(this.himg, this.x, this.y, Card.width, Card.height);
+      //if(this.card.ugc_crd_image){
+        //image(this.card.ugc_crd_image, this.x, this.y - Card.height/4 , Card.width, Card.height);
+      //}
 
-    textAlign(CENTER, CENTER);
-    fill(255);
-    textStyle(BOLD);
-    textSize(15);
-    stroke(0);
-    strokeWeight(2);
-    text(
-      this.card.ugc_crd_cost,
-      this.x + Card.width * 0.905,
-      this.y + Card.height * 0.065
-    );
-    text(
-      this.card.ugc_crd_damage,
-      this.x + Card.width * 0.2,
-      this.y + Card.height * 0.85
-    );
-    text(
-      this.card.ugc_crd_health,
-      this.x + Card.width * 0.8,
-      this.y + Card.height * 0.85
-    );
-    strokeWeight(1);
-    noStroke();
-    fill(0);
-    textSize(13);
-    text(
-      this.card.ugc_crd_name,
-      this.x + Card.width * 0.5,
-      this.y + Card.height * 0.63
-    );
-    textSize(10);
-    textAlign(CENTER, TOP);
-    text(
-      this.card.ugc_crd_gang,
-      this.x + Card.width * 0.1,
-      this.y + Card.height * 0.68,
-      Card.width * 0.8,
-      Card.height * 0.1
-    );
-    text(
-      "Health",
-      this.x + Card.width * 0.39,
-      this.y + Card.height * 0.9,
-      Card.width * 0.8,
-      Card.height * 0.1
-    );
-    text(
-      "Damage",
-      this.x + Card.width * -0.19,
-      this.y + Card.height * 0.9,
-      Card.width * 0.8,
-      Card.height * 0.1
-    );
-    textStyle(NORMAL);
-    noTint();
+      textAlign(CENTER, CENTER);
+      fill(255);
+      textStyle(BOLD);
+      textSize(15);
+      stroke(0);
+      strokeWeight(2);
+      text(
+        this.card.ugc_crd_cost,
+        this.x - 49,
+        this.y - 80
+      );
+      strokeWeight(1);
+      noStroke();
+      textSize(13);
+      text(
+        this.card.ugc_crd_name,
+        this.x,
+        this.y + 10
+      );
+      textSize(10);
+      textAlign(CENTER, TOP);
+      text(
+        this.card.ugc_crd_gang,
+        this.x,
+        this.y + 20
+      );
+      text(
+        this.card.ugc_crd_info,
+        this.x - 50,
+        this.y + 45,
+        100
+      );
+      textStyle(NORMAL);
+      fill(0);
+      noTint();
 
-    if (this.dragging) {
-      tint(255, 100);
-      image(this.img, this.dragx, this.dragy, Card.width, Card.height);
-      tint(255, 255);
+      if (this.dragging) {
+        tint(255, 100);
+        image(this.himg, this.dragx, this.dragy, Card.width, Card.height);
+        tint(255, 255);
+      }
+    }else{
+      image(this.cimg, this.x, this.y, Card.width, Card.height);
+
+      textAlign(CENTER, CENTER);
+      fill(255);
+      textStyle(BOLD);
+      textSize(15);
+      stroke(0);
+      strokeWeight(2);
+      text(
+        this.card.ugc_crd_cost,
+        this.x - 49,
+        this.y - 80
+      );
+      text(
+        this.card.ugc_crd_damage,
+        this.x - 49,
+        this.y + 80
+      );
+      text(
+        this.card.ugc_crd_health,
+        this.x + 49,
+        this.y + 80
+      );
+      strokeWeight(1);
+      noStroke();
+      textSize(13);
+      text(
+        this.card.ugc_crd_name,
+        this.x,
+        this.y + 10
+      );
+      textSize(10);
+      textAlign(CENTER, TOP);
+      text(
+        this.card.ugc_crd_gang,
+        this.x,
+        this.y + 20
+      );
+      textStyle(NORMAL);
+      fill(0);
+      noTint();
+
+      if (this.dragging) {
+        tint(255, 100);
+        image(this.cimg, this.dragx, this.dragy, Card.width, Card.height);
+        tint(255, 255);
+      }
     }
   }
-  /*click() {
-    return (
-      mouseX > this.x &&
-      mouseX < this.x + Card.width &&
-      mouseY > this.y &&
-      mouseY < this.y + Card.height
-    );
-  }*/
-  
 }
 
 class Deck {
@@ -96,12 +123,13 @@ class Deck {
   static nCards = 3;
   selectedCard = null;
 
-  constructor(cardsInfo, x, y, clickAction, cardImg, dragAction) {
+  constructor(cardsInfo, x, y, clickAction, cardImg, hacksimg, dragAction) {
     this.x = x;
     this.y = y;
     this.width = Card.width * Deck.nCards;
     this.clickAction = clickAction;
     this.cardImg = cardImg;
+    this.hacksimg = hacksimg;
     this.cards = this.createCards(cardsInfo);
     this.draggable = false;
     this.dragAction = dragAction;
@@ -113,9 +141,13 @@ class Deck {
     let x = this.x;
     for (let cardInfo of cardsInfo) {
       cards.push(
-        new Card(cardInfo, x, this.y + Deck.titleHeight, this.cardImg)
+        new Card(cardInfo, x, this.y + Deck.titleHeight, this.cardImg, this.hacksimg)
       );
-      x += Card.width;
+      if (cardInfo.ugc_user_game_id == GameInfo.game.opponents[0].id){
+        x -= Card.width;
+      }else{
+        x += Card.width;
+      }
     }
     return cards;
   }
@@ -143,12 +175,14 @@ class Deck {
     }
   }
 
+  //se houver problemas com o dragndrop ver isto aqui
   press() {
     if (!this.draggable) {
       return;
     }
+     //add if for limit the drandrop
     for (let card of this.cards) {
-      if (this.draggable && mouseX > card.x && mouseX < card.x + Card.width && mouseY > card.y && mouseY < card.y + Card.height) {
+      if (this.draggable && mouseX > card.x - Card.width / 2 && mouseX < card.x + Card.width / 2 && mouseY > card.y - Card.height / 2 && mouseY < card.y + Card.height / 2) {
         card.offsetX = card.x - mouseX;
         card.offsetY = card.y - mouseY;
         card.dragx = mouseX + card.offsetX;

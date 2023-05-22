@@ -1,9 +1,9 @@
 async function login() {
-    let msgDOM = document.getElementById("msg");
+    let msgDOM = document.getElementById("loginmsg");
     msgDOM.textContent = "";
     try {
-        let name = document.getElementById("name").value;
-        let pass = document.getElementById("password").value;
+        let name = document.getElementById("loginname").value;
+        let pass = document.getElementById("loginpassword").value;
         let result = await requestLogin(name,pass);
         if (result.err) {
             msgDOM.textContent = "An error occurred";

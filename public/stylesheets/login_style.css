@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body,
+input {
+    font-family: 'Poppins', sans-serif;
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.backgroundimage {
+    filter: blur(4px);
+    -webkit-filter: blur(4px);
+    width: 100%;
+    height: 970px;
+}
+
+.form-container {
+    background-image: url("/assets/Login-form.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 35%;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 400px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+}
+
+.title {
+    position: fixed;
+    font-size: 2.5rem;
+    color: white;
+    bottom: 300px;
+    right: 410px;
+}
+
+.title2 {
+    position: fixed;
+    font-size: 2.5rem;
+    color: white;
+    bottom: 300px;
+    right: 370px;
+}
+
+.img1 {
+    position: relative;
+    top: 300px;
+    left: 1350px;
+    width: 47%;
+}
+.img2 {
+    position: relative;
+    top: 300px;
+    left: 470px;
+    width: 47%;
+}
+
+.input-field {
+    background-image: url("/assets/Field.png");
+    background-repeat: no-repeat;
+    background-size: 90%;
+    max-width: 498px;
+    width: 498px;
+    height: 65px;
+    margin: 10px 0;
+    left: 30px;
+    display: grid;
+    grid-template-columns: 15% 85%;
+    padding: 0 0.4rem;
+    position: relative;
+}
+
+.input-field i {
+    text-align: center;
+    line-height: 55px;
+    color: white;
+    font-size: 1rem;
+}
+
+.input-field input {
+    background: none;
+    outline: none;
+    border: none;
+    line-height: 1;
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: white;
+}
+
+::placeholder {
+    font-weight: 500;
+    color: white;
+}
+
+.btn {
+    position: fixed;
+    background-image: url("/assets/button.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 90%;
+    background-color: transparent;
+    width: 201px;
+    height: 61px;
+    outline: none;
+    border: none;
+    color: white;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin: 10px 0;
+    transition: all 0.5s;
+    margin-left: 360px;
+    margin-top: 450px;
+}
+
+.btn:hover {
+    transform: scale(1.05); 
+}
+
+.btn2 {
+    position: fixed;
+    background-image: url("/assets/button.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 90%;
+    background-color: transparent;
+    width: 201px;
+    height: 61px;
+    outline: none;
+    border: none;
+    color: white;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin: 10px 0;
+    transition: all 0.5s;
+    margin-right: 50px;
+    margin-top: 450px;
+}
+
+.btn2:hover {
+    transform: scale(1.05); 
+}
+
+.signin-signup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: grid;
+    grid-template-columns: 1fr;
+    z-index: 5;
+}
+
+form.sign-in-form {
+    z-index: 2;
+}
+
+form.sign-up-form {
+    z-index: 1;
+    opacity: 0;
+}
+
+.container.sign-up-mode form.sign-in-form {
+    z-index: 1;
+    opacity: 0;
+}
+
+.container.sign-up-mode form.sign-up-form {
+    z-index: 2;
+    opacity: 1;
+}

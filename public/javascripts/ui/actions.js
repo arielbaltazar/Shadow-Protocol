@@ -37,14 +37,42 @@ async function getBoardInfo() {
         GameInfo.gameboard,
         GameInfo.game.player.name,
         GameInfo.game.opponents[0].name,
-        400,
-        150,
+        570,
+        300,
         650,
         380,
         30,
-        GameInfo.images.boardbg,
         GameInfo.images.card,
+        GameInfo.images.chief,
         clickActionAttack
+      );
+  }
+}
+
+async function getBenchInfo() {
+  let result = await requestBenchInfo();
+  let cards = await requestCardsInBench();
+  if (!result.successful) {
+    alert("Something is wrong with the game please login again!");
+    window.location.pathname = "index.html";
+  } else {
+    GameInfo.gamebench = result.bench;
+    GameInfo.cardsInBench = cards.result;
+    if (GameInfo.bench) GameInfo.bench.update(GameInfo.gamebench, GameInfo.cardsInBench);
+    else
+      GameInfo.bench = new Bench(
+        GameInfo.gamebench,
+        GameInfo.cardsInBench,
+        GameInfo.game.player.name,
+        GameInfo.game.opponents[0].name,
+        475,
+        150,
+        800,
+        380,
+        30,
+        GameInfo.images.card,
+        GameInfo.images.hack,
+        dragndropFromBenchToBoard
       );
   }
 }
@@ -56,25 +84,40 @@ async function getDecksInfo() {
     window.location.pathname = "index.html";
   } else {
     GameInfo.matchdeck = result.deck;
-    if (GameInfo.playerDeck) GameInfo.playerDeck.update(GameInfo.matchdeck);
+    if (GameInfo.playerDeck) GameInfo.playerDeck.update(GameInfo.matchdeck.player);
     else
       GameInfo.playerDeck = new Deck(
-        GameInfo.matchdeck,
-        400,
-        500,
+        GameInfo.matchdeck.player,
+        65,
+        820,
         null,
         GameInfo.images.card,
-        dragndrop
+        GameInfo.images.hack,
+        dragndropFromHandToBench
       );
 
-    if (GameInfo.oppDeck) GameInfo.oppDeck.update(GameInfo.matchdeck);
+    if (GameInfo.oppDeck) GameInfo.oppDeck.update(GameInfo.matchdeck.opponent);
     else
-      GameInfo.oppDeck = new Deck(GameInfo.matchdeck, null, null, null, null);
+      GameInfo.oppDeck = new Deck(
+        GameInfo.matchdeck.opponent,
+        1810,
+        60,
+        null,
+        GameInfo.images.backcard,
+        null,
+        null
+      );
   }
 }
-async function dragndrop(x, y, card) {
+async function dragndropFromHandToBench(x, y, card) {
+  let pos = GameInfo.bench.getPlayerColumnAt(x, y);
+  playCardFromHandToBench(card, pos);
+  //alert(pos);
+}
+
+async function dragndropFromBenchToBoard(x, y, card) {
   let pos = GameInfo.board.getPlayerColumnAt(x, y);
-  playCard(card, pos);
+  playCardFromBenchToBoard(card, pos);
   //alert(pos);
 }
 
@@ -106,30 +149,84 @@ async function ChooseDeck2Action() {
 }
 
 // remake this
-let selectedCards = [];
 async function clickActionAttack(x, y) {
-  let card = GameInfo.board.getCardAt(x, y);
-  selectedCards.push(card);
+  if(GameInfo.dragbenchtoboard == true){
+    return
+  }
 
-  if (selectedCards.length === 2) {
-    if(selectedCards[0] == selectedCards[1]){
+  if(GameInfo.game.player.state == "Waiting"){
+    return
+  }
+
+  if(GameInfo.game.turn == 1) {
+    alert("You can't attack in the first turn");
+    return
+  }
+
+  GameInfo.cardattack = true;
+
+  let card = GameInfo.board.getCardAt(x, y);
+  GameInfo.selectedCards.push(card);
+
+  if(GameInfo.selectedCards[0].ugc_crd_active == false){
+    alert("You can't use this card");
+    GameInfo.selectedCards = [];
+    GameInfo.cardattack = false;
+  }
+
+  if (GameInfo.selectedCards.length === 2) {
+
+    if(GameInfo.selectedCards[0].ugc_id == GameInfo.selectedCards[1].ugc_id){
       alert("You can't attack your own card");
     }
-    await attackCard(selectedCards[0], selectedCards[1]);
-    selectedCards = [];
+    
+    if(GameInfo.selectedCards[0].ugc_crd_active == true){
+      await attackCard(GameInfo.selectedCards[0].ugc_id, GameInfo.selectedCards[1].ugc_id);
+    }
+
+    GameInfo.selectedCards = [];
   }
 }
 
-async function playCard(card, position) {
-  //if (confirm(`Do you want to play the "${card.ugc_crd_name}" card?`)) {
-  let result = await requestPlayCard(card.ugc_id, position);
-  if (result.successful) {
-    await getGameInfo();
-    await getBoardInfo();
-    await getDecksInfo();
-    alert("Card Played!");
+async function playCardFromHandToBench(card, position) {
+  if (confirm(`Do you want to play the "${card.ugc_crd_name}" card?`)) {
+    let result = await requestPlayCardFromHandToBench(card.ugc_id, position);
+    if (result.successful) {
+      await getGameInfo();
+      await getBoardInfo();
+      await getBenchInfo();
+      await getDecksInfo();
+      alert(result.msg);
+    }
   }
-  //}
+}
+
+async function playCardFromBenchToBoard(card, position) {
+  if (card.ugc_crd_type_id != 4){
+    if (confirm(`Do you want to play the "${card.ugc_crd_name}" card?`)) {
+      let result = await requestPlayCardFromBenchToBoard(card.ugc_id, position);
+      if (result.successful) {
+        await getGameInfo();
+        await getBoardInfo();
+        await getBenchInfo();
+        await getDecksInfo();
+        GameInfo.dragbenchtoboard = false;
+        alert(result.msg);
+      }
+    }
+  }else{
+    if (confirm(`Do you want to use this hack?`)) {
+      let result = await requestPlayCardFromBenchToBoard(card.ugc_id, position);
+      if (result.successful) {
+        await getGameInfo();
+        await getBoardInfo();
+        await getBenchInfo();
+        await getDecksInfo();
+        GameInfo.dragbenchtoboard = false;
+        alert(result.msg);
+      }
+    }
+  }
 }
 
 async function attackCard(playercard, oppcard) {
@@ -138,7 +235,9 @@ async function attackCard(playercard, oppcard) {
   if (result.successful) {
     await getGameInfo();
     await getBoardInfo();
+    await getBenchInfo();
     await getDecksInfo();
+    GameInfo.cardattack = false;
     alert(result.msg);
   }
   //}

@@ -1,39 +1,69 @@
-<html>
-
-<head>
-  <title>Express</title>
-  <link rel="stylesheet" href="/stylesheets/style.css">
-  <script src="./javascripts/utils/verifications.js"></script>
-  <script src="./javascripts/requests/matchesRequests.js"></script>
-  <script src="./javascripts/requests/usersRequests.js"></script>
-  <script src="./javascripts/login.js"></script>
-</head>
-
-<body>
-  <header>
-    <h1>Login</h1>
-  </header>
-  <main>
-    <p> If you have a match running you will enter that match.
-      Otherwise it will go to the match making page.
-    </p>
-    <form action="javascript:login()">
-      <table>
-        <tr>
-          <td>Name:</td>
-          <td><input type="text" autocomplete="username" id="name"></td>
-        </tr>
-        <tr>
-          <td>Password:</td>
-          <td><input type="password" autocomplete="current-password" id="password"></td>
-        </tr>
-      </table>
-      <p id="msg" class="warning"></p>
-      <p><input type="submit" value="Login"></p>
-      <p><a href="register.html">Create a new account</a></p>
-      <p><a href="scoreboard.html">See previous games Score Board</a></p>
-    </form>
-  </main>
-</body>
-
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE-edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
+        <title>Shadow Protocol</title>
+        <link rel="stylesheet" href="/stylesheets/login_style.css" />
+        <script src="./javascripts/utils/verifications.js"></script>
+        <script src="./javascripts/requests/matchesRequests.js"></script>
+        <script src="./javascripts/requests/usersRequests.js"></script>
+        <script src="./javascripts/login.js"></script>
+        <script src="./javascripts/register.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <img src="/assets/backgroundlogin.jpg" class="backgroundimage">
+            <div class="form-container">
+                <img src="/assets/shadowprotocol1.png" class="img1">
+                <img src="/assets/shadowprotocol2.png" class="img2">
+                <div class="signin-signup">
+                    <form action="javascript:login()" class="sign-in-form">
+                        <h2 class="title">Login</h2>
+                        <div class="input-field">
+                            <i class="fas fa-user"></i>
+                            <input class="text" placeholder="Username" id="loginname" />
+                        </div>
+                        <div class="input-field">
+                            <i class="fas fa-lock"></i>
+                            <input class="password" type="password" placeholder="Password" id="loginpassword" />
+                        </div>
+                        <p id="loginmsg" class="warning"></p>
+                        <input type="submit" class="btn solid" value="Login">
+                        <input type="button" id="sign-up-button" class="btn2 solid" value="Register">
+                    </form>
+                
+                    <form action="javascript:register()" class="sign-up-form">
+                        <h2 class="title2">Register</h2>
+                        <div class="input-field">
+                            <i class="fas fa-user"></i>
+                            <input class="text" placeholder="Username" id="registername" />
+                        </div>
+                        <div class="input-field">
+                            <i class="fas fa-lock"></i>
+                            <input class="password" type="password" placeholder="Password" id="registerpassword" />
+                        </div>
+                        <p id="registermsg" class="warning"></p>
+                        <input type="submit" class="btn solid" value="Register">
+                        <input type="button" id="sign-in-button" class="btn2 solid" value="Login">
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script>
+          const sign_in_button = document.querySelector('#sign-in-button');
+          const sign_up_button = document.querySelector('#sign-up-button');
+          const container = document.querySelector('.container');
+    
+          sign_up_button.addEventListener('click', () => {
+              container.classList.add('sign-up-mode');
+          });
+    
+          sign_in_button.addEventListener('click', () => {
+              container.classList.remove('sign-up-mode');
+          });
+      </script>
+    </body>
 </html>

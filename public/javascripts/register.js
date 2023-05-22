@@ -1,9 +1,9 @@
 async function register() {
-    let msgDOM = document.getElementById("msg");
+    let msgDOM = document.getElementById("registermsg");
     msgDOM.textContent = "";
     try {
-        let name = document.getElementById("name").value;
-        let pass = document.getElementById("password").value;
+        let name = document.getElementById("registername").value;
+        let pass = document.getElementById("registerpassword").value;
         let res = await requestRegister(name,pass);
         if (res.successful) {
             msgDOM.textContent = "Account created. Go to login page";

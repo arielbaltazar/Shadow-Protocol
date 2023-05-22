@@ -25,13 +25,28 @@ router.get("/ChoosenDeck", auth.verifyAuth, async function (req, res, next) {
   }
 });
 
-router.patch("/play", auth.verifyAuth, async function (req, res, next) {
+router.patch("/playfromhandtobench", auth.verifyAuth, async function (req, res, next) {
   try {
     console.log("Play card with id: ", req.body.cardid);
     if (!req.game) {
       res.status(400).send({msg:"You are not at a game, please create or join a game"});
     }else{
-      let result = await Deck.playCard(req.game, req.body.cardid, req.body.position);
+      let result = await Deck.playCardFromHandToBench(req.game, req.body.cardid, req.body.position);
+      res.status(result.status).send(result.result);
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+});
+
+router.patch("/playfrombenchtoboard", auth.verifyAuth, async function (req, res, next) {
+  try {
+    console.log("Play card with id: ", req.body.cardid);
+    if (!req.game) {
+      res.status(400).send({msg:"You are not at a game, please create or join a game"});
+    }else{
+      let result = await Deck.playCardFromBenchToBoard(req.game, req.body.cardid, req.body.position);
       res.status(result.status).send(result.result);
     }
   } catch (err) {

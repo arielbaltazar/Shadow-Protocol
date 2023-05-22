@@ -44,7 +44,7 @@ async function requestDeckChoosen() {
     return {
       successful: response.status == 200,
       unauthenticated: response.status == 401,
-      deck: result,
+      deck: result
     };
   } catch (err) {
     // Treat 500 errors here
@@ -102,9 +102,63 @@ async function requestCardsInBoard() {
   }
 }
 
-async function requestPlayCard(CardId, Position) {
+async function requestBenchInfo() {
   try {
-    const response = await fetch(`/api/decks/play`, {
+    const response = await fetch(`/api/bench`);
+    let result = await response.json();
+    return {
+      successful: response.status == 200,
+      unauthenticated: response.status == 401,
+      bench: result,
+    };
+  } catch (err) {
+    // Treat 500 errors here
+    console.log(err);
+    return { err: err };
+  }
+}
+
+async function requestCardsInBench() {
+  try {
+    const response = await fetch(`/api/bench/in-bench`);
+    let result = await response.json();
+    return {
+      successful: response.status == 200,
+      unauthenticated: response.status == 401,
+      result: result,
+    };
+  } catch (err) {
+    // Treat 500 errors here
+    console.log(err);
+    return { err: err };
+  }
+}
+
+async function requestPlayCardFromHandToBench(CardId, Position) {
+  try {
+    const response = await fetch(`/api/decks/playfromhandtobench`, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "PATCH",
+      body: JSON.stringify({
+        cardid: CardId,
+        position: Position,
+      }),
+    });
+    let result = await response.json();
+    return { successful: response.status == 200, msg: result.msg };
+  } catch (err) {
+    // Treat 500 errors here
+    console.log(err);
+    return { err: err };
+  }
+}
+
+async function requestPlayCardFromBenchToBoard(CardId, Position) {
+  try {
+    const response = await fetch(`/api/decks/playfrombenchtoboard`, {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",

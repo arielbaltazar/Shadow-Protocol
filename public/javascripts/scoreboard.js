@@ -1,82 +1,41 @@
-class ScoreBoard {
-    static width = 300;
-    static height = 100;
-    static x = 10;
-    static y = 350;
-    constructor(game) {
-      this.game = game;
+window.onload = async function() {
+    let result = await requestScores();
+    if (!result.successful || result.err) {
+        alert("Something wrong. Going to login page");
+        window.location.pathname = "/index.html"
     }
-    draw() {
-      fill(100, 200, 100);
-      stroke(0, 0, 0);
-      /*rect(
-        ScoreBoard.x,
-        ScoreBoard.y,
-        ScoreBoard.width,
-        ScoreBoard.height,
-        5,
-        5,
-        5,
-        5
-      );*/
-      fill(0, 0, 0);
-      image(GameInfo.images.chipplayer, ScoreBoard.x + 45, ScoreBoard.y + 100, 110, ScoreBoard.height - 20);
-      image(GameInfo.images.chipopp, ScoreBoard.x + 45, ScoreBoard.y + 190, 110, ScoreBoard.height - 20);
-      textAlign(LEFT, CENTER);
-      textSize(20);
-      textStyle(NORMAL);
-      /*text(
-        "Turn: " + this.game.turn,
-        ScoreBoard.x + 10,
-        ScoreBoard.y + ScoreBoard.height / 4
-      );
-      text(
-        "Player: " + this.game.player.name,
-        ScoreBoard.x + 10,
-        ScoreBoard.y + (2 * ScoreBoard.height) / 4
-      );
-      text(
-        "Opponent: " + this.game.opponents[0].name,
-        ScoreBoard.x + 10,
-        ScoreBoard.y + (3 * ScoreBoard.height) / 4
-      );*/
-      fill(255, 255, 255);
-      text(
-        " " + this.game.player.chips,
-        ScoreBoard.x + 33,
-        ScoreBoard.y + (7.7 * ScoreBoard.height) / 4
-      );
-      fill(255, 255, 255);
-      text(
-        " " + this.game.opponents[0].chips,
-        ScoreBoard.x + 33,
-        ScoreBoard.y + (4 * ScoreBoard.height) / 4
-      );
-      /*text(
-        `(${this.game.player.state})`,
-        ScoreBoard.x + 200,
-        ScoreBoard.y + (2 * ScoreBoard.height) / 4
-      );
-      text(
-        `(${this.game.opponents[0].state})`,
-        ScoreBoard.x + 200,
-        ScoreBoard.y + (3 * ScoreBoard.height) / 4
-      );*/
-      if (this.game.state == "Finished") {
-        fill(200, 0, 0);
-        textSize(24);
-        textStyle(BOLD);
-        textAlign(CENTER, CENTER);
-        text(
-          "GAMEOVER",
-          ScoreBoard.x + 200,
-          ScoreBoard.y - 5 + ScoreBoard.height / 4
-        );
-      }
+    fillScores(result.scores);
+}
+
+
+
+function fillScores(scores) {
+    let container = document.getElementById("scores");
+    for (let score of scores) {
+        let elem = document.createElement("section");
+        let t = document.createElement("table");
+        elem.appendChild(t);
+        let tr = document.createElement("tr");
+        t.appendChild(tr); 
+        let td = document.createElement("td");
+        t.appendChild(td); 
+        td.colSpan = 3;
+        td.style.textAlign = "center";
+        td.style.borderBottom = "2px solid black";
+        td.textContent = "Game "+score.gameId;
+        for (let player of score.playerScores) {
+            let tr = document.createElement("tr");
+            t.appendChild(tr);
+            let td = document.createElement("td");
+            td.textContent = player.name;
+            tr.appendChild(td);
+            td = document.createElement("td");
+            td.textContent = player.state;
+            tr.appendChild(td);
+            td = document.createElement("td");
+            td.textContent = "Points: "+player.points;
+            tr.appendChild(td);
+        }
+        container.appendChild(elem);
     }
-  
-    update(game) {
-      this.game = game;
-    }
-  }
-  
+}

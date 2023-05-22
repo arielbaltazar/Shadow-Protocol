@@ -23,6 +23,7 @@ const playsRouter = require("./routes/playsRoutes");
 const scoresRouter = require("./routes/scoresRoutes");
 const decksRouter = require("./routes/decksRoutes");
 const boardRoutes = require("./routes/boardRoutes");
+const benchRoutes = require("./routes/benchRoutes");
 
 app.use("/api/users",usersRouter);
 app.use("/api/games",gamesRouter);
@@ -30,6 +31,7 @@ app.use("/api/plays",playsRouter);
 app.use("/api/scores",scoresRouter);
 app.use("/api/decks",decksRouter);
 app.use("/api/board", boardRoutes);
+app.use("/api/bench", benchRoutes);
 
 // when we don't find anything
 app.use((req, res, next) => {

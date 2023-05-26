@@ -12,12 +12,17 @@ async function refresh() {
     
     GameInfo.prepareUI();
   }
+
+  if(!GameInfo.yourturntimer){
+    GameInfo.yourturn.draw();
+  }
   // Nothing to do when we are playing since we control all that happens
   // so no update is needed from the server
 }
 
 function preload() {
   GameInfo.images.card = loadImage("/assets/card_template.png");
+  GameInfo.images.turn = loadImage("/assets/your_turn.png");
   GameInfo.images.win = loadImage("/assets/win.png");
   GameInfo.images.lose = loadImage("/assets/lose.png");
   GameInfo.images.backcard = loadImage("/assets/backcard_template.png");
@@ -36,6 +41,7 @@ async function setup() {
 
   imageMode(CENTER);
   angleMode(DEGREES);
+  frameRate(60);
   // preload  images
 
   await getGameInfo();
@@ -96,22 +102,10 @@ function draw() {
     GameInfo.board.draw();
     GameInfo.bench.draw();
     GameInfo.bench.updateDrag();
+    GameInfo.yourturn.draw();
   }
 }
 
-async function endGame() {
-  if (
-    GameInfo.game.opponent[0].obj.crd_chief <= 0) {
-      image(GameInfo.images.win, 0, 0, GameInfo.width, GameInfo.height);
-      GameInfo.game.player.state = "End";
-    }
-   if(GameInfo.game.player.obj.crd_chief <= 0) {
-      image(GameInfo.images.lose, 0, 0, GameInfo.width, GameInfo.height);
-      GameInfo.game.player.state = "End";
-    }
-
- 
-}
 
 async function mouseClicked() {
   /*if ( GameInfo.playerDeck) {

@@ -6,7 +6,7 @@ class Window {
         this.height = height;
         this.opened = false;
         this.buttonList = [];
-        this.createButton('X',x+width-35,y+5,()=> { this.close()});
+        //this.createButton('X',x+width-35,y+5,()=> { this.close()});
     }
 
     createButton(name, x,y, action, widthCenter) {
@@ -38,9 +38,9 @@ class Window {
 
     draw() {
         if (this.opened) {
-            fill(100,200,100);
+            /*fill(100,200,100);
             stroke(0,0,0);
-            rect (this.x,this.y,this.width,this.height,5,5,5,5);
+            rect (this.x,this.y,this.width,this.height,5,5,5,5);*/
         }
     }
 

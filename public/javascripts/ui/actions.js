@@ -7,6 +7,10 @@ async function getGameInfo() {
     GameInfo.game = result.game;
     if (GameInfo.scoreBoard) GameInfo.scoreBoard.update(GameInfo.game);
     else GameInfo.scoreBoard = new ScoreBoard(GameInfo.game);
+    
+    if (GameInfo.yourturn) GameInfo.yourturn.update(GameInfo.game);
+    else GameInfo.yourturn = new YourTurn(GameInfo.game);
+    
     // if game ended we get the scores and prepare the ScoreWindow
     if (GameInfo.game.state == "Finished") {
       let result = await requestScore();
@@ -126,6 +130,7 @@ async function endturnAction() {
   if (result.successful) {
     await getGameInfo();
     GameInfo.prepareUI();
+    GameInfo.yourturntimer = false;
   } else alert("Something went wrong when ending the turn.");
 }
 

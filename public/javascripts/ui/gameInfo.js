@@ -20,6 +20,7 @@ class GameInfo {
   // renderers
   static scoreBoard;
   static scoreWindow;
+  static yourturn;
 
   static matchdeck;
   static playerDeck;
@@ -28,10 +29,12 @@ class GameInfo {
   static bench;
   static player;
   static opponent;
+  static turn;
 
   //verification
   static dragbenchtoboard = false;
   static attackcard = false;
+  static yourturntimer = false;
 
   // buttons
   static endturnButton;

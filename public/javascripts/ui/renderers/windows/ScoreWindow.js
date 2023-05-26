@@ -12,35 +12,24 @@ class ScoreWindow extends Window {
     }
 
     draw() {
-        super.draw();
+        // super.draw();
         if (this.opened) {
-            fill(255);
-            stroke(255);
-            textAlign(CENTER,CENTER);
-           
-            textStyle(NORMAL);
-            strokeWeight(3);
-            for (let i=0; i<2; i++) {
-                line(this.x+this.width/5,this.y+(i+2)*this.height/5,
-                    this.x+4*this.width/5, this.y+(i+2)*this.height/5);
+            if(this.player.id == GameInfo.game.player.id){
+                if(this.player.state == 'Won'){
+                    image(GameInfo.images.win, 950, 500, 550, 510);
+                }
+                if(this.player.state == 'Lost'){{
+                    image(GameInfo.images.lose, 950, 500, 550, 510)};  
+                }
             }
-            for (let i=0; i<2; i++) {
-                line(this.x+(i+2)*this.width/5,this.y+this.height/5,
-                    this.x+(i+2)*this.width/5, this.y+4*this.height/5);
+            if(this.player.id == GameInfo.game.opponents[0].id){
+                if(this.opp.state == 'Won'){
+                    image(GameInfo.images.win, 200, 500, 310, 200);
+                }
+                if(this.opp.state == 'Lost'){{
+                    image(GameInfo.images.lose, 200, 150, 310, 200)};  
+                }
             }
-            strokeWeight(1);
-            textSize(40);
-            text("Score",this.x,this.y,this.width,this.height/5);
-            textSize(30);
-            text("Name",this.x+this.width/5,this.y+this.height/5,this.width/5,this.height/5);
-            text("State",this.x+2*this.width/5,this.y+this.height/5,this.width/5,this.height/5);
-            
-            text(this.player.name,this.x+this.width/5,this.y+2*this.height/5,this.width/5,this.height/5);
-            text(this.player.state,this.x+2*this.width/5,this.y+2*this.height/5,this.width/5,this.height/5);
-           
-            text(this.opp.name,this.x+this.width/5,this.y+3*this.height/5,this.width/5,this.height/5);
-            text(this.opp.state,this.x+2*this.width/5,this.y+3*this.height/5,this.width/5,this.height/5);
-            
         }
     }
 

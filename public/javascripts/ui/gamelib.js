@@ -31,6 +31,10 @@ function preload() {
   GameInfo.images.chipplayer = loadImage("/assets/chip_p.png");
   GameInfo.images.chipopp = loadImage("/assets/chip_o.png");
   GameInfo.images.backgroundgame = loadImage("/assets/background_game.jpg");
+ // GameInfo.sounds.login = loadSound("/assets/lifelike.mp3");
+  GameInfo.sounds.gameplay = loadSound("/assets/password_infinity.mp3");
+  GameInfo.sounds.click = loadSound("/assets/interface.mp3");
+  
   
   //GameInfo.images.boardbg = loadImage("/assets/window_green.png");
 }
@@ -85,6 +89,9 @@ async function setup() {
 }
 
 function draw() {
+  if(!GameInfo.sounds.gameplay.isPlaying()){
+      GameInfo.sounds.gameplay.play();
+  }
   imageMode(CENTER);
   image(GameInfo.images.backgroundgame, GameInfo.width / 2, GameInfo.height / 2);
   if (GameInfo.loading) {
@@ -103,6 +110,7 @@ function draw() {
     GameInfo.bench.draw();
     GameInfo.bench.updateDrag();
     GameInfo.yourturn.draw();
+  
   }
 }
 
@@ -113,6 +121,9 @@ async function mouseClicked() {
   }*/
   GameInfo.board.click();
   //GameInfo.bench.click();
+  if(!GameInfo.sounds.click.isPlaying()){
+    GameInfo.sounds.click.play();
+}
 }
 
 async function mousePressed() {
@@ -122,6 +133,9 @@ async function mousePressed() {
   if (GameInfo.bench) {
     GameInfo.bench.press();
   }
+  if(!GameInfo.sounds.click.isPlaying()){
+    GameInfo.sounds.click.play();
+}
 }
 
 async function mouseReleased() {
@@ -131,4 +145,4 @@ async function mouseReleased() {
   if (GameInfo.bench) {
     GameInfo.bench.release();
   }
-}  
+} 

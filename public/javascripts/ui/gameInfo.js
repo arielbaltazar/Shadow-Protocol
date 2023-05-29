@@ -30,6 +30,9 @@ class GameInfo {
   static player;
   static opponent;
   static turn;
+  static login;
+  static gameplay;
+  static click;
 
   //verification
   static dragbenchtoboard = false;
